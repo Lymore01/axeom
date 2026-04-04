@@ -1,3 +1,10 @@
+export interface AxiomValidationError {
+  path: (string | number)[];
+  message: string;
+  code: string;
+  metadata?: any;
+}
+
 export function createRegex(path: string, paramNames: string[] = []) {
   const regexSource = path
     .replace(/\//g, "\\/")
@@ -5,22 +12,35 @@ export function createRegex(path: string, paramNames: string[] = []) {
       if (!paramNames.includes(name)) paramNames.push(name);
       return "([^/]+)";
     })
-    .replace(/\*/g, "(.*)");
+    .replace(/\*/g, () => {
+      if (!paramNames.includes("*")) paramNames.push("*");
+      return "(.*)";
+    });
 
   return new RegExp(`^${regexSource}$`);
 }
 
-export function formatValidationError(error: any) {
-  const formatted: Record<string, string> = {};
-  const list = error.issues || error.errors;
+export function formatValidationError(error: any): AxiomValidationError[] {
+  const issues = error.issues || [];
 
-  if (Array.isArray(list)) {
-    list.forEach((err) => {
-      const path = err.path.join(".") || "_form";
-      formatted[path] = err.message;
-    });
-    return formatted;
+  if (Array.isArray(issues) && issues.length > 0) {
+    return issues.map((issue) => ({
+      path: issue.path,
+      message: issue.message,
+      code: issue.code,
+      metadata: issue.expected
+        ? {
+            expected: issue.expected,
+            received: issue.received,
+          }
+        : undefined,
+    }));
   }
-
-  return { _form: error.message || "Unknown validation error" };
+  return [
+    {
+      path: ["_form"],
+      message: error.message || "Unknown validation error",
+      code: "custom",
+    },
+  ];
 }

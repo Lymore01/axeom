@@ -69,3 +69,11 @@ Origin: http://localhost:5173
 GET {{base_url}}/test
 Origin: http://malicious-site.com
 
+###
+POST {{base_url}}/test
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "age": "thirty"
+}

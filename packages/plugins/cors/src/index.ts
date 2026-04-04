@@ -26,10 +26,16 @@ export const cors = (options: CorsOptions = {}) => {
     return false;
   };
 
-  const setCorsHeaders = (resHeaders: Headers, requestOrigin: string | null) => {
-    const allowedOrigin = (origin === "*" || !requestOrigin) 
-      ? (typeof origin === "string" ? origin : "*")
-      : requestOrigin;
+  const setCorsHeaders = (
+    resHeaders: Headers,
+    requestOrigin: string | null,
+  ) => {
+    const allowedOrigin =
+      origin === "*" || !requestOrigin
+        ? typeof origin === "string"
+          ? origin
+          : "*"
+        : requestOrigin;
 
     resHeaders.set("Access-Control-Allow-Origin", allowedOrigin);
     resHeaders.set("Access-Control-Allow-Methods", methods.join(", "));
@@ -38,13 +44,17 @@ export const cors = (options: CorsOptions = {}) => {
     if (credentials) resHeaders.set("Access-Control-Allow-Credentials", "true");
   };
 
-  return (app: Axiom<any, any>) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(
+    app: Axiom<T, D>,
+  ) => {
     return app
       .onBeforeMatch((req) => {
         const requestOrigin = req.headers.get("Origin");
 
         if (requestOrigin && !isOriginAllowed(requestOrigin)) {
-          throw new ForbiddenError(`CORS: Origin ${requestOrigin} is not allowed`);
+          throw new ForbiddenError(
+            `CORS: Origin ${requestOrigin} is not allowed`,
+          );
         }
 
         if (req.method === "OPTIONS") {

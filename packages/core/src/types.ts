@@ -8,11 +8,17 @@ export type ParamsObject<T extends string> = {
   [K in ExtractParams<T>]: string;
 };
 
+// recursive
 export type Prettify<T> = T extends Function | any[]
   ? T
   : {
       [K in keyof T]: T[K] extends object ? Prettify<T[K]> : T[K];
     } & {};
+
+// shallow
+// export type Prettify<T> = {
+//   [K in keyof T]: T[K];
+// } & {};
 
 export interface Validator<T = any> {
   _output: T;
@@ -42,6 +48,8 @@ export type Context<
     body: S["body"] extends Validator ? Infer<S["body"]> : any;
     headers: Headers;
     request: Request;
+    setResponseHeader: (name: string, value: string) => void;
+    getResponseHeaders: () => Record<string, string>;
   } & D
 >;
 

@@ -16,6 +16,7 @@
     "@axiom/logger-plugin": "workspace:*",
     "@axiom/security": "workspace:*",
     "@axiom/static": "workspace:*",
+    "@axiom/rate-limit": "workspace:*",
     "zod": "^4.3.6"
   },
   "devDependencies": {

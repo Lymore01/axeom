@@ -15,7 +15,8 @@
       "@axiom/logger": ["packages/logger/src/index.ts"],
       "@axiom/logger-plugin": ["packages/plugins/logger/src/index.ts"],
       "@axiom/cors": ["packages/plugins/cors/src/index.ts"],
-      "@axiom/security": ["packages/plugins/security/src/index.ts"]
+      "@axiom/security": ["packages/plugins/security/src/index.ts"],
+      "@axiom/rate-limit": ["packages/plugins/rate-limit/src/index.ts"]
     },
     "types": ["node"]
   },

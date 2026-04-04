@@ -4,6 +4,7 @@ export class RadixNode<D extends Record<string, any>> {
   public part: string;
   public children: Map<string, RadixNode<D>> = new Map();
   public wildcardChild: RadixNode<D> | null = null;
+  public catchAllChild: RadixNode<D> | null = null;
   public paramName: string | null = null;
   public handlers: Map<string, Route<D>> = new Map();
 
@@ -24,6 +25,15 @@ export class RadixNode<D extends Record<string, any>> {
     }
 
     const currentSegment = segments[index];
+
+    if (currentSegment === "*") {
+      if (!this.catchAllChild) {
+        this.catchAllChild = new RadixNode("*");
+      }
+      this.catchAllChild.handlers.set(method, route);
+      return;
+    }
+
     const isWildcard = currentSegment.startsWith(":");
 
     if (isWildcard) {
@@ -75,6 +85,16 @@ export class RadixNode<D extends Record<string, any>> {
         newParams,
       );
       if (result) return result;
+    }
+
+    // 3. Try catch-all match
+    if (this.catchAllChild) {
+      const route = this.catchAllChild.handlers.get(method);
+      if (route) {
+        // Collect everything remaining into a single param or just return
+        params["*"] = segments.slice(index).join("/");
+        return { route, params };
+      }
     }
 
     return null;

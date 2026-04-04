@@ -1,19 +1,12 @@
 import { createPinoLogger, type Logger } from "@axiom/logger";
-import {
-  AxiomError,
-  BadRequestError,
-  ForbiddenError,
-  InternalServerError,
-  NotFoundError,
-  UnauthorizedError,
-} from "./errors";
+import { AxiomError } from "./errors";
 import { Hooks } from "./hooks";
 import { Router } from "./router";
 import type { Context, Handler, RouteSchema } from "./types";
 import { createRegex, formatValidationError } from "./utils";
 
-export * from "./types";
 export * from "./errors";
+export * from "./types";
 
 export class Axiom<
   T extends Record<string, any> = {},
@@ -204,6 +197,8 @@ export class Axiom<
         rawParams[name] = match[index + 1];
       });
 
+      const responseHeaders: Record<string, string> = {};
+
       ctx = {
         ...route.decorators,
         params: rawParams,
@@ -211,6 +206,10 @@ export class Axiom<
         headers: incomingRequest.headers,
         request: incomingRequest,
         body: undefined,
+        setResponseHeader: (name: string, value: string) => {
+          responseHeaders[name] = value;
+        },
+        getResponseHeaders: () => responseHeaders,
       };
 
       // 2. Body Parsing (skip for GET/HEAD)
@@ -267,6 +266,11 @@ export class Axiom<
       if (data instanceof Response) return data;
 
       let response = Response.json(data);
+
+      const ctxHeaders = ctx.getResponseHeaders();
+      Object.entries(ctxHeaders).forEach(([name, value]) => {
+        response.headers.set(name, value as string);
+      });
 
       // 8. Hooks: onResponse
       for (const onResponseFn of route.onResponses || []) {
