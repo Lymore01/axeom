@@ -57,6 +57,9 @@ importers:
       '@axiom/auth':
         specifier: workspace:*
         version: link:../../packages/plugins/auth
+      '@axiom/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       '@axiom/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -98,6 +101,12 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+
+  packages/client:
+    dependencies:
+      '@axiom/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:

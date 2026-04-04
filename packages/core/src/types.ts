@@ -33,6 +33,32 @@ export type RouteSchema = {
 
 export type Infer<S> = S extends Validator<infer T> ? T : any;
 
+export type RouteInput<Path extends string, S extends RouteSchema> = Prettify<
+  (S["body"] extends Validator ? { body: Infer<S["body"]> } : { body?: never }) &
+    (S["query"] extends Validator
+      ? { query: Infer<S["query"]> }
+      : { query?: Record<string, string | undefined> }) &
+    (keyof ParamsObject<Path> extends never
+      ? { params?: ParamsObject<Path> }
+      : { params: ParamsObject<Path> })
+>;
+
+export type RouteMetadata<Path extends string, S extends RouteSchema, Return> = {
+  input: RouteInput<Path, S>;
+  output: Return;
+};
+
+/**
+ * Automatically prefixes all keys in a metadata object (e.g., "GET /users" -> "GET /v1/users")
+ */
+export type PrefixT<Prefix extends string, T> = {
+  [K in keyof T as K extends `${infer Method} ${infer Path}`
+    ? `${Method} ${Prefix}${Path}` extends `${infer M} ${infer P}`
+      ? `${M} ${P extends `/${string}` ? P : `/${P}`}`
+      : never
+    : never]: T[K];
+};
+
 export type Context<
   Path extends string,
   S extends RouteSchema = {},
