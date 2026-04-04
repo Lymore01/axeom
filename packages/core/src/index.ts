@@ -2,7 +2,13 @@ import { createPinoLogger, type Logger } from "@axiom/logger";
 import { AxiomError } from "./errors";
 import { Hooks } from "./hooks";
 import { Router } from "./router";
-import type { Context, Handler, RouteSchema } from "./types";
+import type {
+  Context,
+  Handler,
+  PrefixT,
+  RouteMetadata,
+  RouteSchema,
+} from "./types";
 import { createRegex, formatValidationError } from "./utils";
 
 export * from "./errors";
@@ -49,18 +55,22 @@ export class Axiom<
    * Registers a plugin.
    */
   use<NewT extends Record<string, any>, NewD extends Record<string, any>>(
-    plugin: (app: Axiom<T, D>) => Axiom<NewT, D & NewD>,
-  ): Axiom<T & NewT, D & NewD> {
-    return plugin(this) as Axiom<T & NewT, D & NewD>;
+    plugin: (app: Axiom<T, D>) => Axiom<NewT, NewD>,
+  ): Axiom<T & NewT, NewD> {
+    return plugin(this) as unknown as Axiom<T & NewT, NewD>;
   }
 
   /**
    * Groups routes under a common path prefix and providing isolation for derivations and hooks.
    */
-  group<NewT extends Record<string, any>, NewD extends Record<string, any>>(
-    prefix: string,
-    run: (app: Axiom<T, D>) => Axiom<NewT, D & NewD>,
-  ): Axiom<T & NewT, D & NewD> {
+  group<
+    Prefix extends string,
+    NewT extends Record<string, any>,
+    NewD extends Record<string, any>,
+  >(
+    prefix: Prefix,
+    run: (app: Axiom<T, D>) => Axiom<NewT, NewD>,
+  ): Axiom<T & PrefixT<Prefix, NewT>, NewD> {
     const branch = new Axiom<T, D>();
 
     // Inherit from parent
@@ -83,7 +93,7 @@ export class Axiom<
       });
     });
 
-    return this as unknown as Axiom<T & NewT, D & NewD>;
+    return this as unknown as any;
   }
 
   /**
@@ -95,11 +105,12 @@ export class Axiom<
   }
 
   private addRoute<
+    Method extends string,
     Path extends string,
     S extends RouteSchema = {},
     Return = any,
   >(
-    method: string,
+    method: Method,
     path: Path,
     handler: Handler<Path, S, D, Return>,
     schema?: S,
@@ -117,7 +128,7 @@ export class Axiom<
     );
 
     return this as unknown as Axiom<
-      T & { [K in `${string} ${Path}`]: Return },
+      T & { [K in `${Method} ${Path}`]: RouteMetadata<Path, S, Return> },
       D
     >;
   }
