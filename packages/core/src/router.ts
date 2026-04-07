@@ -1,6 +1,6 @@
+import { RadixTree } from "./radix";
 import type { Handler, Route, RouteSchema } from "./types";
 import { createRegex } from "./utils";
-import { RadixTree } from "./radix";
 
 export class Router<D extends Record<string, any>> {
   private tree = new RadixTree<D>();

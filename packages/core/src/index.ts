@@ -230,10 +230,18 @@ export class Axiom<
       };
       ctx.getResponseHeaders = () => responseHeaders;
 
-      // 2. Body Parsing (skip for GET/HEAD)
+      // 2. Body Parsing
       if (method !== "GET" && method !== "HEAD") {
+        const contentType = incomingRequest.headers.get("content-type");
         try {
-          ctx.body = await incomingRequest.json();
+          if (contentType?.includes("application/json")) {
+            ctx.body = await incomingRequest.json();
+          } else if (
+            contentType?.includes("multipart/form-data") ||
+            contentType?.includes("application/x-www-form-urlencoded")
+          ) {
+            ctx.body = await incomingRequest.formData();
+          }
         } catch {
           ctx.body = null;
         }
@@ -270,8 +278,12 @@ export class Axiom<
             ctx.params = await route.schema.params.parse(ctx.params);
           if (route.schema.query)
             ctx.query = await route.schema.query.parse(ctx.query);
-          if (route.schema.body)
+          if (route.schema.body) {
+            if (ctx.body instanceof FormData) {
+              ctx.body = Object.fromEntries(ctx.body.entries());
+            }
             ctx.body = await route.schema.body.parse(ctx.body);
+          }
         } catch (e: any) {
           const formattedErrors = formatValidationError(e);
           return Response.json(

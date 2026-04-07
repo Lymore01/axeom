@@ -57,34 +57,34 @@ export abstract class AxiomSchema<T> implements Validator<T> {
     return finalData;
   }
 
-  optional() {
+  optional(): this & AxiomSchema<T | undefined> {
     this._isOptional = true;
-    return this as unknown as AxiomSchema<T | undefined>;
+    return this as any;
   }
 
-  nullable() {
+  nullable(): this & AxiomSchema<T | null> {
     this._isNullable = true;
-    return this as unknown as AxiomSchema<T | null>;
+    return this as any;
   }
 
-  default(val: T) {
+  default(val: T): this {
     this._defaultValue = val;
     return this;
   }
 
-  transform<U>(fn: (data: T) => U | Promise<U>) {
+  transform<U>(fn: (data: T) => U | Promise<U>): AxiomSchema<U> & this {
     this._transforms.push(fn);
-    return this as unknown as AxiomSchema<U>;
+    return this as any;
   }
 
   refine(
     fn: (data: T) => boolean | Promise<boolean>,
     message = "Invalid value",
-  ) {
+  ): this {
     return this.transform(async (data) => {
       if (!(await fn(data))) throw new Error(message);
       return data;
-    });
+    }) as any;
   }
 }
 
@@ -291,6 +291,69 @@ class ArraySchema<T extends Validator> extends AxiomSchema<T["_output"][]> {
 }
 
 /**
+ * File Schema - Validates that the input is a standard File or Blob.
+ */
+class FileSchema extends AxiomSchema<File> {
+  protected _validate(data: unknown): ValidationResult<File> {
+    // Check if it's a native File or Blob object
+    return data instanceof File || data instanceof Blob
+      ? { success: true, data: data as File }
+      : { success: false, error: "Expected File or Blob" };
+  }
+
+  max(sizeInBytes: number, message?: string) {
+    return this.refine(
+      (v) => v.size <= sizeInBytes,
+      message || `File is too large (max ${sizeInBytes} bytes)`,
+    );
+  }
+
+  min(sizeInBytes: number, message?: string) {
+    return this.refine(
+      (v) => v.size >= sizeInBytes,
+      message || `File is too small (min ${sizeInBytes} bytes)`,
+    );
+  }
+
+  type(mimeType: MimeType, message?: string) {
+    return this.refine(
+      (v) => v.type.startsWith(mimeType),
+      message || `Invalid file type (expected ${mimeType})`,
+    );
+  }
+}
+
+/**
+ * Common Mime Types for autocomplete
+ */
+export type MimeType =
+  | "image/jpeg"
+  | "image/png"
+  | "image/gif"
+  | "image/webp"
+  | "image/svg+xml"
+  | "application/pdf"
+  | "application/json"
+  | "application/xml"
+  | "application/zip"
+  | "application/x-zip-compressed"
+  | "application/octet-stream"
+  | "text/plain"
+  | "text/html"
+  | "text/css"
+  | "text/javascript"
+  | "video/mp4"
+  | "video/mpeg"
+  | "audio/mpeg"
+  | "audio/wav"
+  | "image/"
+  | "video/"
+  | "audio/"
+  | "text/"
+  | "application/"
+  | (string & {});
+
+/**
  * The 's' export - The main library interface.
  */
 export const s = {
@@ -301,6 +364,7 @@ export const s = {
   object: <T extends Record<string, Validator>>(shape: T) =>
     new ObjectSchema(shape),
   array: <T extends Validator>(item: T) => new ArraySchema(item),
+  file: () => new FileSchema(),
 };
 
 export default s;

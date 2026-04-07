@@ -6,9 +6,10 @@ export interface ExpressAdapterOptions {
   onListen?: () => void;
 }
 
-export function createExpressAdapter(axiom: Axiom<any, any>, app: Express = express()) {
-  app.use(express.json());
-
+export function createExpressAdapter(
+  axiom: Axiom<any, any>,
+  app: Express = express(),
+) {
   app.use(async (req, res) => {
     const protocol = req.protocol;
     const host = req.get("host");
@@ -18,7 +19,9 @@ export function createExpressAdapter(axiom: Axiom<any, any>, app: Express = expr
       const webRequest = new Request(fullUrl, {
         method: req.method,
         headers: new Headers(req.headers as any),
-        body: ["GET", "HEAD"].includes(req.method) ? null : JSON.stringify(req.body),
+        body: ["GET", "HEAD"].includes(req.method) ? null : (req as any),
+        // @ts-ignore - Required for Node.js Fetch with a stream body
+        duplex: "half",
       });
 
       const webResponse = await axiom.handle(webRequest);

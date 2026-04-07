@@ -42,7 +42,7 @@ export function staticPlugin(options: StaticOptions) {
   return <T extends Record<string, any>, D extends Record<string, any>>(
     app: Axiom<T, D>,
   ) =>
-    app.get(`${prefix}/*` as any, async (ctx) => {
+    app.get(`${prefix}/*` as any, async (ctx: any) => {
       try {
         const relativePath = (ctx.params as any)["*"] || "";
 
