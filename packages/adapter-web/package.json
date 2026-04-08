@@ -1,0 +1,11 @@
+{
+  "name": "@axiom/web",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "description": "Standard Web (WinterTC) adapter for Axiom. Support for Next.js, SvelteKit, Astro, and more.",
+  "dependencies": {
+    "@axiom/core": "workspace:*"
+  }
+}
