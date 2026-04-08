@@ -1,6 +1,6 @@
 {
-  "name": "axiom",
-  "description": "A framework for building web applications",
+  "name": "axiom-root",
+  "description": "The weightless framework for heavy performance",
   "version": "1.0.0",
   "private": true,
   "type": "module",

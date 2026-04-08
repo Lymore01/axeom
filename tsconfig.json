@@ -9,7 +9,6 @@
     "baseUrl": "./",
     "paths": {
       "@axiom/core": ["packages/core/src/index.ts"],
-      "@axiom/express": ["packages/adapter-express/src/index.ts"],
       "@axiom/static": ["packages/plugins/static/src/index.ts"],
       "@axiom/auth": ["packages/plugins/auth/src/index.ts"],
       "@axiom/logger": ["packages/logger/src/index.ts"],
@@ -21,7 +20,10 @@
       "@axiom/upload": ["packages/plugins/upload/src/index.ts"],
       "@axiom/compression": ["packages/plugins/compression/src/index.ts"],
       "@axiom/ws": ["packages/plugins/ws/src/index.ts"],
-      "@axiom/swagger": ["packages/plugins/swagger/src/index.ts"]
+      "@axiom/swagger": ["packages/plugins/swagger/src/index.ts"],
+      "@axiom/web": ["packages/adapter-web/src/index.ts"],
+      "@axiom/client": ["packages/client/src/index.ts"],
+      "@axiom/adapter-express": ["packages/adapter-express/src/index.ts"]
     },
     "types": ["node"]
   },
