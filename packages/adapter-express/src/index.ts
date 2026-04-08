@@ -26,15 +26,21 @@ export function createExpressAdapter(
 
       const webResponse = await axiom.handle(webRequest);
 
-      const contentType = webResponse.headers.get("content-type");
+      webResponse.headers.forEach((value, key) => {
+        res.setHeader(key, value);
+      });
 
-      if (contentType?.includes("application/json")) {
-        const data = await webResponse.json();
-        res.status(webResponse.status).json(data);
-      } else {
-        const text = await webResponse.text();
-        res.status(webResponse.status).send(text);
+      res.status(webResponse.status);
+
+      if (webResponse.body) {
+        const reader = webResponse.body.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          res.write(value);
+        }
       }
+      res.end();
     } catch (error) {
       console.error("Adapter Error:", error);
       res.status(500).json({ error: "Internal Adapter Error" });

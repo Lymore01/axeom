@@ -20,7 +20,8 @@
     "@axiom/static": "workspace:*",
     "@axiom/rate-limit": "workspace:*",
     "zod": "^4.3.6",
-    "@axiom/schema": "workspace:*"
+    "@axiom/schema": "workspace:*",
+    "@axiom/compression": "workspace:*"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

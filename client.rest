@@ -1,4 +1,4 @@
-@base_url=http://localhost:3333
+@base_url=http://localhost:3000
 @title=Axiom REST Adapter Example
 
 ###
@@ -95,3 +95,12 @@ Content-Type: application/json
 }
 
 # sse
+GET {{base_url}}/events
+
+### Compression Test (Small - Should NOT compress)
+GET {{base_url}}/posts
+Accept-Encoding: gzip
+
+### Compression Test (Large - SHOULD compress)
+GET {{base_url}}/large
+Accept-Encoding: gzip

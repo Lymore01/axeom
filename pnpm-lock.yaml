@@ -80,6 +80,9 @@ importers:
       '@axiom/client':
         specifier: workspace:*
         version: link:../../packages/client
+      '@axiom/compression':
+        specifier: workspace:*
+        version: link:../../packages/plugins/compression
       '@axiom/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -167,6 +170,12 @@ importers:
       jose:
         specifier: ^6.0.8
         version: 6.2.2
+
+  packages/plugins/compression:
+    dependencies:
+      '@axiom/core':
+        specifier: workspace:*
+        version: link:../../core
 
   packages/plugins/cors:
     dependencies:

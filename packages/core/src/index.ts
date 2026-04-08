@@ -301,7 +301,13 @@ export class Axiom<
       const data = await route.handler(ctx);
       if (data instanceof Response) return data;
 
-      let response = Response.json(data);
+      const body = JSON.stringify(data);
+      let response = new Response(body, {
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": body.length.toString(),
+        },
+      });
 
       const ctxHeaders = ctx.getResponseHeaders();
       Object.entries(ctxHeaders).forEach(([name, value]) => {

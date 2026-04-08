@@ -1,4 +1,5 @@
 import { authPlugin, authRoutes } from "@axiom/auth";
+import { compression } from "@axiom/compression";
 import Axiom from "@axiom/core";
 import { cors } from "@axiom/cors";
 import { createExpressAdapter } from "@axiom/express";
@@ -11,6 +12,7 @@ import uploadPlugin from "@axiom/upload";
 export const axiom = new Axiom()
   .use(authPlugin({ secret: "DEVELOPMENT_SECRET_KEY" }))
   .use(uploadPlugin({ dest: "./uploads" }))
+  .use(compression({ threshold: 1024 }))
   .use(cors({ origin: ["http://localhost:5173"] }))
   .use(securityHeaders())
   .use(rateLimit({ limit: 10, windowMs: 60 * 1000 }))
@@ -43,6 +45,9 @@ export const axiom = new Axiom()
   })
   .get("/posts", () => {
     return { message: "List of posts (Node/Express)" };
+  })
+  .get("/large", () => {
+    return { data: "A".repeat(2048) };
   })
   .get("/test", ({ logger, db }) => {
     logger.info("Fetching data...");
