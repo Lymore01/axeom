@@ -1,4 +1,4 @@
-import { authRoutes } from "@axiom/auth";
+import { authPlugin, authRoutes } from "@axiom/auth";
 import Axiom from "@axiom/core";
 import { cors } from "@axiom/cors";
 import { createExpressAdapter } from "@axiom/express";
@@ -9,6 +9,7 @@ import { staticPlugin } from "@axiom/static";
 import uploadPlugin from "@axiom/upload";
 
 export const axiom = new Axiom()
+  .use(authPlugin({ secret: "DEVELOPMENT_SECRET_KEY" }))
   .use(uploadPlugin({ dest: "./uploads" }))
   .use(cors({ origin: ["http://localhost:5173"] }))
   .use(securityHeaders())

@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "@axiom/core": "workspace:*"
+    "@axiom/core": "workspace:*",
+    "jose": "^6.0.8"
   }
 }

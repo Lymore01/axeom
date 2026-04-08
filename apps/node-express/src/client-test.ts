@@ -2,6 +2,7 @@ import { createAxiomClient } from "@axiom/client";
 import type { axiom } from "./index.js";
 
 // 1. Create the client using only the server's type!
+// For nextjs change the base url to point to your next capture all endpoint
 const client = createAxiomClient<typeof axiom>("http://localhost:3000");
 
 async function runTest() {
