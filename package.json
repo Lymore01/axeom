@@ -17,6 +17,7 @@
     "dev:bun-native": "turbo dev --filter bun-native-app",
     "dev:cf": "turbo dev --filter cloudflare-workers-example",
     "dev:deno": "turbo dev --filter deno-example",
+    "dev:nextjs": "turbo dev --filter nextjs-example",
     "build": "turbo build",
     "test": "turbo test",
     "lint": "turbo lint",

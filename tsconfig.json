@@ -8,6 +8,7 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": "./",
     "paths": {
+      "axeom": ["packages/axeom/src/index.ts"],
       "@axeom/core": ["packages/core/src/index.ts"],
       "@axeom/static": ["packages/plugins/static/src/index.ts"],
       "@axeom/auth": ["packages/plugins/auth/src/index.ts"],
