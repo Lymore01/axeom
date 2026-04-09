@@ -56,8 +56,9 @@ export const swagger = (options: SwaggerOptions = {}) => {
         if (!paths[path]) paths[path] = {};
 
         paths[path][method] = {
-          summary: `${route.method} ${route.path}`,
-          tags: [route.path.split("/")[1] || "default"],
+          summary: route.schema?.summary || `${route.method} ${route.path}`,
+          description: route.schema?.description,
+          tags: route.schema?.tags || [route.path.split("/")[1] || "default"],
           parameters: [] as any[],
           responses: {
             200: {
@@ -113,7 +114,7 @@ export const swagger = (options: SwaggerOptions = {}) => {
       });
 
       return {
-        openapi: "3.0.0",
+        openapi: "3.1.0",
         info,
         servers: [{ url: basePath }],
         paths,

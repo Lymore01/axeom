@@ -54,60 +54,96 @@ export type AxeomClient<T extends Record<string, any>> = {
         : [options: T[M]["input"]]
     ) => Promise<T[M]["output"]>;
   };
+} & {
+  // 4. Dynamic Indexer: Handles function calls (client.user("123"))
+  <Segment extends string>(
+    segment: Segment,
+  ): AxeomClient<{
+    [P in keyof T as P extends `${infer Method} /:${string}/${infer Rest}`
+      ? `${Method} /${Rest}`
+      : P extends `${infer Method} /:${string}`
+        ? `${Method} /`
+        : never]: T[P] extends { input: infer I }
+      ? Omit<T[P], "input"> & { input: Partial<I> }
+      : T[P];
+  }>;
+} & {
+  // 5. Property Indexer: Handles segment indexing (client.user["123"])
+  [index: string]: AxeomClient<{
+    [P in keyof T as P extends `${infer Method} /:${string}/${infer Rest}`
+      ? `${Method} /${Rest}`
+      : P extends `${infer Method} /:${string}`
+        ? `${Method} /`
+        : never]: T[P] extends { input: infer I }
+      ? Omit<T[P], "input"> & { input: Partial<I> }
+      : T[P];
+  }>;
 };
 
 export type InferRegistry<A> = A extends Axeom<infer T, any> ? T : never;
+
+export interface AxeomClientOptions {
+  fetch?: typeof fetch;
+}
 
 /**
  * Creates a type-safe client for the given Axeom app's registry.
  */
 export function createAxeomClient<T extends Record<string, any>>(
   baseUrl: string = "/",
+  options: AxeomClientOptions = {},
 ): AxeomClient<T extends Axeom<infer R, any> ? R : T> {
+  const fetcher = options.fetch || fetch;
+
   const createProxy = (pathParts: string[] = []): any => {
     return new Proxy(() => {}, {
       get(_, prop: string) {
         const method = prop.toUpperCase();
         if (["GET", "POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-          return async (options: any = {}) => {
+          return async (requestOptions: any = {}) => {
             let fullPath = "/" + pathParts.join("/");
 
             // Handle path parameters (like :id)
-            if (options.params) {
-              Object.entries(options.params).forEach(([key, value]) => {
+            if (requestOptions.params) {
+              Object.entries(requestOptions.params).forEach(([key, value]) => {
                 fullPath = fullPath.replace(`:${key}`, String(value));
               });
             }
 
             // Normalizing Base URL for the URL constructor
-            const origin = typeof window !== "undefined" 
-              ? window.location.origin 
-              : "http://localhost";
-            
-            const baseWithSlash = baseUrl.startsWith("http") 
-              ? baseUrl 
+            const origin =
+              typeof window !== "undefined"
+                ? window.location.origin
+                : "http://localhost";
+
+            const baseWithSlash = baseUrl.startsWith("http")
+              ? baseUrl
               : origin + (baseUrl.startsWith("/") ? "" : "/") + baseUrl;
-            
+
             const url = new URL(
-              (baseWithSlash.endsWith("/") ? baseWithSlash.slice(0, -1) : baseWithSlash) + fullPath,
-              origin
+              (baseWithSlash.endsWith("/")
+                ? baseWithSlash.slice(0, -1)
+                : baseWithSlash) + fullPath,
+              origin,
             );
 
             // Handle query parameters
-            if (options.query) {
-              Object.entries(options.query).forEach(([key, value]) => {
+            if (requestOptions.query) {
+              Object.entries(requestOptions.query).forEach(([key, value]) => {
                 if (value !== undefined) {
                   url.searchParams.append(key, String(value));
                 }
               });
             }
 
-            const response = await fetch(url.toString(), {
+            const response = await fetcher(url.toString(), {
               method,
               headers: {
                 "Content-Type": "application/json",
               },
-              body: options.body ? JSON.stringify(options.body) : undefined,
+              body: requestOptions.body
+                ? JSON.stringify(requestOptions.body)
+                : undefined,
             });
 
             if (!response.ok) {

@@ -21,7 +21,7 @@ export type Prettify<T> = T extends Function | any[]
 // } & {};
 
 /**
- * Contract for schema validation. Implementing this allows custom object types 
+ * Contract for schema validation. Implementing this allows custom object types
  * to be used in RouteSchema.
  */
 export interface Validator<T = any> {
@@ -36,12 +36,18 @@ export type RouteSchema = {
   body?: Validator;
   query?: Validator;
   params?: Validator;
+  responses?: Record<number, any>;
+  summary?: string;
+  description?: string;
+  tags?: string[];
 };
 
 export type Infer<S> = S extends Validator<infer T> ? T : any;
 
 export type RouteInput<Path extends string, S extends RouteSchema> = Prettify<
-  (S["body"] extends Validator ? { body: Infer<S["body"]> } : { body?: never }) &
+  (S["body"] extends Validator
+    ? { body: Infer<S["body"]> }
+    : { body?: never }) &
     (S["query"] extends Validator
       ? { query: Infer<S["query"]> }
       : { query?: Record<string, string | undefined> }) &
@@ -50,7 +56,11 @@ export type RouteInput<Path extends string, S extends RouteSchema> = Prettify<
       : { params: ParamsObject<Path> })
 >;
 
-export type RouteMetadata<Path extends string, S extends RouteSchema, Return> = {
+export type RouteMetadata<
+  Path extends string,
+  S extends RouteSchema,
+  Return,
+> = {
   input: RouteInput<Path, S>;
   output: Return;
 };
@@ -106,7 +116,6 @@ export type Handler<
   D extends Record<string, any> = {},
   Return = any,
 > = (ctx: Context<Path, S, D>) => Return | Promise<Return>;
-
 
 export interface Route<D extends Record<string, any> = any> {
   method: string;
