@@ -5,7 +5,7 @@
     "dev": "bun --watch src/index.ts"
   },
   "dependencies": {
-    "@axeom/core": "workspace:*",
+    "axeom": "workspace:*",
     "@axeom/auth": "workspace:*",
     "zod": "^3.22.4"
   }

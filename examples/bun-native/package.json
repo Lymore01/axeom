@@ -6,8 +6,8 @@
     "dev": "bun --hot index.ts"
   },
   "dependencies": {
+    "axeom": "workspace:*",
     "@axeom/adapter-bun": "workspace:*",
-    "@axeom/core": "workspace:*",
     "@axeom/ws": "workspace:*",
     "@axeom/swagger": "workspace:*",
     "@axeom/upload": "workspace:*",

@@ -9,6 +9,6 @@
     "@types/deno": "^2.5.0"
   },
   "dependencies": {
-    "@axeom/core": "workspace:*"
+    "axeom": "workspace:*"
   }
 }

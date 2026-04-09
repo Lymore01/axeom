@@ -1,6 +1,6 @@
-import Axeom from "@axeom/core";
+import Axeom from "axeom";
 
-const Axeom = new Axeom()
+const axeom = new Axeom()
   .get("/", () => {
     return {
       message: "Hello from Cloudflare Workers! ☁️",
@@ -16,6 +16,6 @@ const Axeom = new Axeom()
 
 export default {
   async fetch(request: Request, _env: any, _ctx: any): Promise<Response> {
-    return Axeom.handle(request);
+    return axeom.handle(request);
   },
 };

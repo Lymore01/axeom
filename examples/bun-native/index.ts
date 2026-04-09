@@ -1,8 +1,7 @@
-import Axeom, { $START_TIME } from "@axeom/core";
-import s from "@axeom/schema";
 import { swagger } from "@axeom/swagger";
 import uploadPlugin from "@axeom/upload";
 import wsPlugin from "@axeom/ws";
+import Axeom, { $START_TIME, s } from "axeom";
 
 new Axeom()
   .use(uploadPlugin({ dest: "./uploads" }))

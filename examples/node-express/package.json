@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "axeom": "workspace:*",
     "@axeom/auth": "workspace:*",
     "@axeom/client": "workspace:*",
     "@axeom/core": "workspace:*",

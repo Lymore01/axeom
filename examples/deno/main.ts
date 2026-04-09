@@ -1,6 +1,6 @@
-import Axeom from "@axeom/core";
+import Axeom from "axeom";
 
-const Axeom = new Axeom()
+const axeom = new Axeom()
   .get("/", () => {
     return {
       message: "Axeom running on Deno! 🦕",
@@ -10,4 +10,4 @@ const Axeom = new Axeom()
   })
   .get("/api/v1", () => ({ status: "OK" }));
 
-Axeom.listen(3002);
+axeom.listen(3002);

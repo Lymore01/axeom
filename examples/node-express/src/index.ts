@@ -1,17 +1,16 @@
 import { authPlugin, authRoutes } from "@axeom/auth";
 import { compression } from "@axeom/compression";
-import Axeom from "@axeom/core";
 import { cors } from "@axeom/cors";
 import { createExpressAdapter } from "@axeom/express";
 import { rateLimit } from "@axeom/rate-limit";
-import { s } from "@axeom/schema";
 import { securityHeaders } from "@axeom/security";
 import { staticPlugin } from "@axeom/static";
 import { swagger } from "@axeom/swagger";
 import uploadPlugin from "@axeom/upload";
 import { wsPlugin } from "@axeom/ws";
+import Axeom, { s } from "axeom";
 
-export const Axeom = new Axeom()
+const axeom = new Axeom()
   .use(wsPlugin())
   .use(swagger({ info: { title: "Axeom Node/Express API" } }))
   .use(authPlugin({ secret: "DEVELOPMENT_SECRET_KEY" }))
@@ -95,7 +94,8 @@ export const Axeom = new Axeom()
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   });
-const server = createExpressAdapter(Axeom);
+
+const server = createExpressAdapter(axeom as any);
 
 server.listen(3000, () => {
   console.log("Axeom is live (Node/Express) at http://localhost:3000");

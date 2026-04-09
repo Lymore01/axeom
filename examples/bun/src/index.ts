@@ -1,8 +1,7 @@
 import { authRoutes } from "@axeom/auth";
-import Axeom from "@axeom/core";
-import { s } from "@axeom/schema";
+import Axeom, { s } from "axeom";
 
-const Axeom = new Axeom()
+const axeom = new Axeom()
   .decorate({
     db: { query: (sql: string) => `Result from Bun DB for ${sql}` },
     log: (msg: string) => console.log(`[BUN LOG]: ${msg}`),
@@ -45,6 +44,6 @@ console.log("Axeom is live (Bun Native) at http://localhost:3001");
 export default {
   port: 3001,
   async fetch(req: Request) {
-    return Axeom.handle(req);
+    return axeom.handle(req);
   },
 };
