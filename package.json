@@ -11,14 +11,15 @@
   },
   "license": "MIT",
   "scripts": {
-    "dev": "pnpm dev:node",
-    "dev:node": "pnpm --filter node-express-example dev",
-    "dev:bun": "pnpm --filter bun-example dev",
-    "dev:bun-native": "pnpm --filter bun-native-app dev",
-    "dev:cf": "pnpm --filter cloudflare-workers-example dev",
-    "dev:deno": "pnpm --filter deno-example dev",
-    "build": "pnpm -r build",
-    "lint": "biome lint .",
+    "dev": "turbo dev",
+    "dev:node": "turbo dev --filter node-express-example",
+    "dev:bun": "turbo dev --filter bun-example",
+    "dev:bun-native": "turbo dev --filter bun-native-app",
+    "dev:cf": "turbo dev --filter cloudflare-workers-example",
+    "dev:deno": "turbo dev --filter deno-example",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check:unsafe": "biome check --write --unsafe ."
@@ -28,6 +29,7 @@
     "@biomejs/biome": "^2.4.10",
     "@types/node": "^22.13.10",
     "tsx": "^4.21.0",
+    "turbo": "^2.9.5",
     "typescript": "^6.0.2"
   }
 }
