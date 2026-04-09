@@ -4,7 +4,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "author": "Lymore01",
+  "author": {
+    "name": "Kelly Limo",
+    "url": "https://github.com/Lymore01",
+    "email": "kellytoroitich89@gmail.com"
+  },
   "license": "MIT",
   "scripts": {
     "dev": "pnpm dev:node",
