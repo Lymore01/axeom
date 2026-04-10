@@ -1,6 +1,6 @@
-import type { Axeom } from "@axeom/core";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
+import type { Axeom } from "@axeom/core";
 
 export const MIME_TYPES: Record<string, string> = {
   ".html": "text/html",
@@ -39,9 +39,7 @@ export function staticPlugin(options: StaticOptions) {
   const { prefix, rootPath, maxAge = 3600 } = options;
   const absRoot = resolve(rootPath);
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) =>
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) =>
     app.get(`${prefix}/*` as any, async (ctx: any) => {
       try {
         const relativePath = (ctx.params as any)["*"] || "";

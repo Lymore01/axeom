@@ -11,10 +11,7 @@ export interface ExpressAdapterOptions {
  * Bridges the Axeom engine with an Express application.
  * Handles the conversion of Node.js req/res to Web Request/Response.
  */
-export function createExpressAdapter(
-  Axeom: Axeom<any, any>,
-  app: Express = express(),
-) {
+export function createExpressAdapter(Axeom: Axeom<any, any>, app: Express = express()) {
   const wss = new WebSocketServer({ noServer: true });
   app.use(async (req, res) => {
     const protocol = req.protocol;
@@ -26,7 +23,7 @@ export function createExpressAdapter(
         method: req.method,
         headers: new Headers(req.headers as any),
         body: ["GET", "HEAD"].includes(req.method) ? null : (req as any),
-        // @ts-ignore - Required for Node.js Fetch with a stream body
+        // @ts-expect-error - Required for Node.js Fetch with a stream body
         duplex: "half",
       });
 
@@ -58,14 +55,8 @@ export function createExpressAdapter(
       const server = app.listen(port, cb);
 
       server.on("upgrade", (request, socket, head) => {
-        const url = new URL(
-          request.url || "",
-          `http://${request.headers.host}`,
-        );
-        const matched = Axeom.router.match(
-          request.method || "GET",
-          url.pathname,
-        );
+        const url = new URL(request.url || "", `http://${request.headers.host}`);
+        const matched = Axeom.router.match(request.method || "GET", url.pathname);
 
         if (matched && matched.route.metadata?.ws) {
           wss.handleUpgrade(request, socket, head, (ws: any) => {

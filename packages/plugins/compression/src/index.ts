@@ -16,9 +16,7 @@ export interface CompressionOptions {
 export const compression = (options: CompressionOptions = {}) => {
   const threshold = options.threshold ?? 1024;
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app.onResponse(async (res: Response, ctx) => {
       if (
         !res.body ||
@@ -50,7 +48,7 @@ export const compression = (options: CompressionOptions = {}) => {
       if (!encoding) return res;
 
       try {
-        // @ts-ignore - CompressionStream is available in modern runtimes (Bun, Deno, Node 18+)
+        // @ts-expect-error - CompressionStream is available in modern runtimes (Bun, Deno, Node 18+)
         const compressionStream = new CompressionStream(encoding);
         const compressedBody = res.body.pipeThrough(compressionStream);
 

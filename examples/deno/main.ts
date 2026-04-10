@@ -1,6 +1,9 @@
-import Axeom from "axeom";
+import swagger from "@axeom/swagger";
+import Axeom, { logger } from "axeom";
 
-const axeom = new Axeom()
+new Axeom()
+  .use(logger())
+  .use(swagger({ info: { title: "Axeom Deno API" } }))
   .get("/", () => {
     return {
       message: "Axeom running on Deno! 🦕",
@@ -8,6 +11,14 @@ const axeom = new Axeom()
       version: Deno.version.deno,
     };
   })
-  .get("/api/v1", () => ({ status: "OK" }));
-
-axeom.listen(3002);
+  .get("/api/v1", () => ({ status: "OK" }))
+  .sse("/events", async function* () {
+    for (let i = 0; i < 10; i++) {
+      yield {
+        message: `Event ${i}`,
+        timestamp: new Date().toISOString(),
+      };
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  })
+  .listen(3002);

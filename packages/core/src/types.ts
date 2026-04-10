@@ -45,9 +45,7 @@ export type RouteSchema = {
 export type Infer<S> = S extends Validator<infer T> ? T : any;
 
 export type RouteInput<Path extends string, S extends RouteSchema> = Prettify<
-  (S["body"] extends Validator
-    ? { body: Infer<S["body"]> }
-    : { body?: never }) &
+  (S["body"] extends Validator ? { body: Infer<S["body"]> } : { body?: never }) &
     (S["query"] extends Validator
       ? { query: Infer<S["query"]> }
       : { query?: Record<string, string | undefined> }) &
@@ -56,11 +54,7 @@ export type RouteInput<Path extends string, S extends RouteSchema> = Prettify<
       : { params: ParamsObject<Path> })
 >;
 
-export type RouteMetadata<
-  Path extends string,
-  S extends RouteSchema,
-  Return,
-> = {
+export type RouteMetadata<Path extends string, S extends RouteSchema, Return> = {
   input: RouteInput<Path, S>;
   output: Return;
 };
@@ -83,17 +77,14 @@ export type PrefixT<Prefix extends string, T> = {
 export type Context<
   Path extends string,
   S extends RouteSchema = {},
+  T extends Record<string, any> = {},
   D extends Record<string, any> = {},
 > = Prettify<
   {
     /** The URL path parameters. */
-    params: S["params"] extends Validator
-      ? Infer<S["params"]>
-      : ParamsObject<Path>;
+    params: S["params"] extends Validator ? Infer<S["params"]> : ParamsObject<Path>;
     /** The URL search parameters. */
-    query: S["query"] extends Validator
-      ? Infer<S["query"]>
-      : Record<string, string | undefined>;
+    query: S["query"] extends Validator ? Infer<S["query"]> : Record<string, string | undefined>;
     /** The parsed request body. */
     body: S["body"] extends Validator ? Infer<S["body"]> : any;
     /** Standard Web Headers object. */
@@ -108,7 +99,8 @@ export type Context<
     setResponseHeader: (name: string, value: string) => void;
     /** Internal helper to retrieve manual headers. */
     getResponseHeaders: () => Record<string, string>;
-  } & D
+  } & T &
+    D
 >;
 
 /**
@@ -117,35 +109,29 @@ export type Context<
 export type Handler<
   Path extends string = string,
   S extends RouteSchema = {},
+  T extends Record<string, any> = {},
   D extends Record<string, any> = {},
   Return = any,
-> = (ctx: Context<Path, S, D>) => Return | Promise<Return>;
+> = (ctx: Context<Path, S, T, D>) => Return | Promise<Return>;
 
-export interface Route<D extends Record<string, any> = any> {
+export interface Route<T extends Record<string, any> = any, D extends Record<string, any> = any> {
   method: string;
   path: string;
   regex: RegExp;
-  handler: Handler<any, any, D, any>;
+  handler: Handler<any, any, T, D, any>;
   paramNames: string[];
   schema?: RouteSchema;
   derives: Array<(ctx: any) => any>;
   decorators: Record<string, any>;
   onRequests?: Array<(ctx: any) => void | Promise<void>>;
   onResponses?: Array<
-    (
-      res: Response,
-      ctx: any,
-    ) => Response | undefined | Promise<Response | undefined>
+    (res: Response, ctx: any) => Response | undefined | Promise<Response | undefined>
   >;
   beforeHandles: Array<
-    (
-      ctx: Context<any, any, D>,
-    ) => Response | undefined | Promise<Response | undefined>
+    (ctx: Context<any, any, T, D>) => Response | undefined | Promise<Response | undefined>
   >;
   afterHandles: Array<
-    (
-      ctx: Context<any, any, D>,
-    ) => Response | undefined | Promise<Response | undefined>
+    (ctx: Context<any, any, T, D>) => Response | undefined | Promise<Response | undefined>
   >;
   metadata?: Record<string, any>;
 }

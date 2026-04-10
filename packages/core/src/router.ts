@@ -5,9 +5,9 @@ import { createRegex } from "./utils";
 /**
  * Manages route registration and path matching using a Radix Tree.
  */
-export class Router<D extends Record<string, any>> {
-  private tree = new RadixTree<D>();
-  private routes: Route<D>[] = [];
+export class Router<T extends Record<string, any>, D extends Record<string, any>> {
+  private tree = new RadixTree<T, D>();
+  private routes: Route<T, D>[] = [];
 
   /**
    * Registers a new route with its associated state (hooks, derivations, and decorators).
@@ -15,7 +15,7 @@ export class Router<D extends Record<string, any>> {
   add<Path extends string, S extends RouteSchema, Return>(
     method: string,
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     state: {
       derives: any[];
       decorators: any;
@@ -29,7 +29,7 @@ export class Router<D extends Record<string, any>> {
   ) {
     const paramNames: string[] = [];
 
-    const route: Route<D> = {
+    const route: Route<T, D> = {
       method,
       path,
       regex: createRegex(path, paramNames),
@@ -71,7 +71,7 @@ export class Router<D extends Record<string, any>> {
     return { route, match: matchArray };
   }
 
-  addRoute(route: Route<D>) {
+  addRoute(route: Route<T, D>) {
     this.routes.push(route);
     this.tree.add(route.method, route.path, route);
   }
@@ -80,9 +80,9 @@ export class Router<D extends Record<string, any>> {
     return this.routes;
   }
 
-  setRoutes(routes: Route<D>[]) {
+  setRoutes(routes: Route<T, D>[]) {
     this.routes = routes;
-    this.tree = new RadixTree<D>();
+    this.tree = new RadixTree<T, D>();
     routes.forEach((r) => this.tree.add(r.method, r.path, r));
   }
 }

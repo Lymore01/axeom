@@ -1,9 +1,12 @@
-import Axeom from "axeom";
+import { swagger } from "@axeom/swagger";
+import Axeom, { logger } from "axeom";
 
 const axeom = new Axeom()
+  .use(swagger({ info: { title: "Axeom Cloudflare Workers API" } }))
+  .use(logger())
   .get("/", () => {
     return {
-      message: "Hello from Cloudflare Workers! ☁️",
+      message: "Hello from Cloudflare Workers!",
       runtime: "workerd",
       region: "edge",
     };

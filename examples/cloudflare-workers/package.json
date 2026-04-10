@@ -6,7 +6,8 @@
     "dev": "wrangler dev src/index.ts"
   },
   "dependencies": {
-    "axeom": "workspace:*"
+    "axeom": "workspace:*",
+    "@axeom/swagger": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260403.1",

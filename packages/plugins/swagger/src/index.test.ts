@@ -4,16 +4,14 @@ import { swagger } from "./index";
 
 describe("Swagger Plugin", () => {
   it("should generate valid OpenAPI JSON", async () => {
-    const app = new Axeom()
-      .use(swagger())
-      .get("/hello", () => ({ message: "world" }), {
-        description: "Say hello to the world",
-        responses: {
-          200: s.object({
-            message: s.string(),
-          }),
-        },
-      });
+    const app = new Axeom().use(swagger()).get("/hello", () => ({ message: "world" }), {
+      description: "Say hello to the world",
+      responses: {
+        200: s.object({
+          message: s.string(),
+        }),
+      },
+    });
 
     // Request the swagger JSON
     const res = await app.handle(new Request("http://localhost/swagger.json"));
@@ -29,13 +27,11 @@ describe("Swagger Plugin", () => {
   });
 
   it("should include path parameters in OpenAPI spec", async () => {
-    const app = new Axeom()
-      .use(swagger())
-      .get("/user/:id", ({ params }) => ({ id: params.id }), {
-        params: s.object({
-          id: s.string(),
-        }),
-      });
+    const app = new Axeom().use(swagger()).get("/user/:id", ({ params }) => ({ id: params.id }), {
+      params: s.object({
+        id: s.string(),
+      }),
+    });
 
     const res = await app.handle(new Request("http://localhost/swagger.json"));
     const spec = await res.json();

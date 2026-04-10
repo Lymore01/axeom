@@ -13,10 +13,7 @@ export interface WebAdapterOptions {
  * Creates a standard Web (Fetch API) compatible handler for Axeom.
  * This works natively with Next.js, SvelteKit, Astro, SolidStart, and more.
  */
-export function createWebHandler(
-  Axeom: Axeom<any, any>,
-  options: WebAdapterOptions = {},
-) {
+export function createWebHandler(Axeom: Axeom<any, any>, options: WebAdapterOptions = {}) {
   const handler = async (req: Request) => {
     let requestToHandle = req;
 

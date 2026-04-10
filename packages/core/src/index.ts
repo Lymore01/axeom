@@ -2,13 +2,7 @@ import { createPinoLogger, type Logger } from "@axeom/logger-lib";
 import { AxeomError } from "./errors";
 import { Hooks } from "./hooks";
 import { Router } from "./router";
-import type {
-  Context,
-  Handler,
-  PrefixT,
-  RouteMetadata,
-  RouteSchema,
-} from "./types";
+import type { Context, Handler, PrefixT, RouteMetadata, RouteSchema } from "./types";
 import { createRegex, formatValidationError } from "./utils";
 
 export * from "./errors";
@@ -33,15 +27,13 @@ export class Axeom<
   T extends Record<string, any> = {},
   D extends Record<string, any> = { logger: Logger },
 > {
-  public router = new Router<any>();
-  private hooks = new Hooks<any>();
+  public router = new Router<T, D>();
+  private hooks = new Hooks<T, D>();
   private server: any;
   private derives: Array<(ctx: any) => any> = [];
   private decorators: Record<string, any> = { logger: createPinoLogger() };
 
-  private errorHandler: (error: any, ctx: Context<any, any, D>) => any = (
-    error,
-  ) => {
+  private errorHandler: (error: any, ctx: Context<any, any, T, D>) => any = (error) => {
     if (error instanceof AxeomError) {
       return {
         status: "error",
@@ -62,9 +54,7 @@ export class Axeom<
    * @param fn - A function that receives the current context and returns new properties to merge.
    */
   derive<NewD extends Record<string, any>>(
-    fn: (
-      ctx: Context<any, any, D>,
-    ) => NewD | Response | Promise<NewD | Response>,
+    fn: (ctx: Context<any, any, T, D>) => NewD | Response | Promise<NewD | Response>,
   ): Axeom<T, D & Exclude<NewD, Response>> {
     this.derives.push(fn);
     return this as unknown as Axeom<T, D & Exclude<NewD, Response>>;
@@ -90,11 +80,7 @@ export class Axeom<
    * @param prefix - The path prefix (e.g., "/api/v1").
    * @param run - A function where you define the routes for this group.
    */
-  group<
-    Prefix extends string,
-    NewT extends Record<string, any>,
-    NewD extends Record<string, any>,
-  >(
+  group<Prefix extends string, NewT extends Record<string, any>, NewD extends Record<string, any>>(
     prefix: Prefix,
     run: (app: Axeom<T, D>) => Axeom<NewT, NewD>,
   ): Axeom<T & PrefixT<Prefix, NewT>, NewD> {
@@ -141,7 +127,7 @@ export class Axeom<
   >(
     method: Method,
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
     metadata?: Record<string, any>,
   ) {
@@ -166,7 +152,7 @@ export class Axeom<
 
   get<Path extends string, S extends RouteSchema = {}, Return = any>(
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
   ) {
     return this.addRoute("GET", path, handler, schema);
@@ -174,7 +160,7 @@ export class Axeom<
 
   post<Path extends string, S extends RouteSchema = {}, Return = any>(
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
   ) {
     return this.addRoute("POST", path, handler, schema);
@@ -182,7 +168,7 @@ export class Axeom<
 
   put<Path extends string, S extends RouteSchema = {}, Return = any>(
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
   ) {
     return this.addRoute("PUT", path, handler, schema);
@@ -190,7 +176,7 @@ export class Axeom<
 
   patch<Path extends string, S extends RouteSchema = {}, Return = any>(
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
   ) {
     return this.addRoute("PATCH", path, handler, schema);
@@ -198,7 +184,7 @@ export class Axeom<
 
   delete<Path extends string, S extends RouteSchema = {}, Return = any>(
     path: Path,
-    handler: Handler<Path, S, D, Return>,
+    handler: Handler<Path, S, T, D, Return>,
     schema?: S,
   ) {
     return this.addRoute("DELETE", path, handler, schema);
@@ -220,28 +206,41 @@ export class Axeom<
     const startTime = performance.now();
 
     // Helper to finalize the response with headers and timing
-    const finalizeResponse = (res: Response, currentCtx?: any) => {
+    const finalizeResponse = async (res: Response, currentCtx?: any, routeHooks?: any) => {
+      let finalRes = res;
+
+      // Run onResponse hooks (local first if available, otherwise global)
+      // Note: routeHooks.onResponses already includes global hooks snapshotted at route registration.
+      const hooksToRun = routeHooks?.onResponses || this.hooks.onResponses;
+
+      if (hooksToRun && hooksToRun.length > 0) {
+        for (const onResponseFn of hooksToRun) {
+          const result = await onResponseFn(finalRes, currentCtx);
+          if (result instanceof Response) finalRes = result;
+        }
+      }
+
       const duration = performance.now() - startTime;
-      res.headers.set("Server-Timing", `total;dur=${duration.toFixed(2)}`);
+      finalRes.headers.set("Server-Timing", `total;dur=${duration.toFixed(2)}`);
 
       if (currentCtx && typeof currentCtx.getResponseHeaders === "function") {
         const ctxHeaders = currentCtx.getResponseHeaders();
         Object.entries(ctxHeaders).forEach(([name, value]) => {
-          res.headers.set(name, value as string);
+          finalRes.headers.set(name, value as string);
         });
       }
-      return res;
+      return finalRes;
     };
 
     if (this.hooks.onBeforeMatch.length > 0) {
       try {
         for (const hook of this.hooks.onBeforeMatch) {
           const result = await hook(incomingRequest);
-          if (result instanceof Response) return finalizeResponse(result);
+          if (result instanceof Response) return await finalizeResponse(result);
         }
       } catch (error: any) {
         const errorResponse = await this.errorHandler(error, {} as any);
-        return finalizeResponse(
+        return await finalizeResponse(
           Response.json(errorResponse, { status: error?.status || 500 }),
         );
       }
@@ -249,11 +248,11 @@ export class Axeom<
 
     const matched = this.router.match(method, pathname);
     if (!matched) {
-      return finalizeResponse(new Response("Route not found", { status: 404 }));
+      return await finalizeResponse(new Response("Route not found", { status: 404 }));
     }
 
     const { route, match } = matched;
-    let ctx = Object.create(null);
+    const ctx = Object.create(null);
 
     try {
       const rawParams: any = {};
@@ -302,7 +301,7 @@ export class Axeom<
       if (route.derives && route.derives.length > 0) {
         for (const deriveFn of route.derives) {
           const result = await deriveFn(ctx);
-          if (result instanceof Response) return finalizeResponse(result, ctx);
+          if (result instanceof Response) return await finalizeResponse(result, ctx, route);
           if (result) Object.assign(ctx, result);
         }
       }
@@ -316,17 +315,14 @@ export class Axeom<
       if (route.beforeHandles && route.beforeHandles.length > 0) {
         for (const hook of route.beforeHandles) {
           const response = await hook(ctx);
-          if (response instanceof Response)
-            return finalizeResponse(response, ctx);
+          if (response instanceof Response) return await finalizeResponse(response, ctx, route);
         }
       }
 
       if (route.schema) {
         try {
-          if (route.schema.params)
-            ctx.params = await route.schema.params.parse(ctx.params);
-          if (route.schema.query)
-            ctx.query = await route.schema.query.parse(ctx.query);
+          if (route.schema.params) ctx.params = await route.schema.params.parse(ctx.params);
+          if (route.schema.query) ctx.query = await route.schema.query.parse(ctx.query);
           if (route.schema.body) {
             if (ctx.body instanceof FormData) {
               ctx.body = Object.fromEntries(ctx.body.entries());
@@ -345,6 +341,7 @@ export class Axeom<
               { status: 400 },
             ),
             ctx,
+            route,
           );
         }
       }
@@ -358,28 +355,22 @@ export class Axeom<
         response = Response.json(response);
       }
 
-      if (route.onResponses && route.onResponses.length > 0) {
-        for (const onResponseFn of route.onResponses) {
-          const result = await onResponseFn(response, ctx);
-          if (result instanceof Response) response = result;
-        }
-      }
-
       if (route.afterHandles && route.afterHandles.length > 0) {
         for (const hook of route.afterHandles) {
           const result = await hook(ctx);
-          if (result instanceof Response) return finalizeResponse(result, ctx);
+          if (result instanceof Response) return await finalizeResponse(result, ctx, route);
         }
       }
 
-      return finalizeResponse(response, ctx);
+      return await finalizeResponse(response, ctx, route);
     } catch (error: any) {
       const errorResponse = await this.errorHandler(error, ctx);
-      return finalizeResponse(
+      return await finalizeResponse(
         Response.json(errorResponse, {
           status: error?.status || 500,
         }),
         ctx,
+        route,
       );
     }
   }
@@ -387,7 +378,7 @@ export class Axeom<
   /**
    * Registers a global error handler.
    */
-  onError(fn: (error: any, ctx: Context<any, any, D>) => any): this {
+  onError(fn: (error: any, ctx: Context<any, any, T, D>) => any): this {
     this.errorHandler = fn;
     return this;
   }
@@ -395,7 +386,7 @@ export class Axeom<
   /**
    * Registers a global hook that runs as soon as a request is received.
    */
-  onRequest(fn: (ctx: Context<any, any, D>) => void | Promise<void>): this {
+  onRequest(fn: (ctx: Context<any, any, T, D>) => void | Promise<void>): this {
     this.hooks.addRequestHook(fn as any);
     return this;
   }
@@ -404,9 +395,7 @@ export class Axeom<
    * Registers a hook that runs before the router attempts to match a path.
    * Useful for global redirects or early security checks.
    */
-  onBeforeMatch(
-    fn: (req: Request) => Response | undefined | Promise<Response | undefined>,
-  ): this {
+  onBeforeMatch(fn: (req: Request) => Response | undefined | Promise<Response | undefined>): this {
     this.hooks.addBeforeMatchHook(fn);
     return this;
   }
@@ -418,7 +407,7 @@ export class Axeom<
   onResponse(
     fn: (
       res: Response,
-      ctx: Context<any, any, D>,
+      ctx: Context<any, any, T, D>,
     ) => Response | undefined | Promise<Response | undefined>,
   ): this {
     this.hooks.addResponseHook(fn as any);
@@ -429,9 +418,7 @@ export class Axeom<
    * Registers a hook that runs before the route handler is executed.
    */
   onBeforeHandle(
-    fn: (
-      ctx: Context<any, any, D>,
-    ) => Response | undefined | Promise<Response | undefined>,
+    fn: (ctx: Context<any, any, T, D>) => Response | undefined | Promise<Response | undefined>,
   ): this {
     this.hooks.addBeforeHandleHook(fn as any);
     return this;
@@ -441,9 +428,7 @@ export class Axeom<
    * Registers a hook that runs after the route handler is executed.
    */
   onAfterHandle(
-    fn: (
-      ctx: Context<any, any, D>,
-    ) => Response | undefined | Promise<Response | undefined>,
+    fn: (ctx: Context<any, any, T, D>) => Response | undefined | Promise<Response | undefined>,
   ): this {
     this.hooks.addAfterHandleHook(fn as any);
     return this;
@@ -455,10 +440,7 @@ export class Axeom<
    * @param path - The path for the SSE stream.
    * @param handler - A function returning an async iterable that yields data chunks.
    */
-  sse<T = any>(
-    path: string,
-    handler: (ctx: any) => AsyncIterable<T> | Promise<AsyncIterable<T>>,
-  ) {
+  sse<T = any>(path: string, handler: (ctx: any) => AsyncIterable<T> | Promise<AsyncIterable<T>>) {
     return this.get(path, async (ctx) => {
       if ((ctx as any)[$SERVER]?.timeout) {
         (ctx as any)[$SERVER].timeout(ctx.request, 0);
@@ -469,8 +451,7 @@ export class Axeom<
       const readable = new ReadableStream({
         async start(controller) {
           for await (const chunk of stream) {
-            const data =
-              typeof chunk === "string" ? chunk : JSON.stringify(chunk);
+            const data = typeof chunk === "string" ? chunk : JSON.stringify(chunk);
             controller.enqueue(`data: ${data}\n\n`);
           }
           controller.close();
@@ -496,14 +477,12 @@ export class Axeom<
    */
   listen(portOrOptions: number | any = 3000): any {
     const options =
-      typeof portOrOptions === "number"
-        ? { port: portOrOptions }
-        : portOrOptions || {};
+      typeof portOrOptions === "number" ? { port: portOrOptions } : portOrOptions || {};
     const port = options.port || 3000;
 
-    // @ts-ignore - Bun detection
+    // @ts-expect-error - Bun detection
     if (typeof Bun !== "undefined") {
-      // @ts-ignore
+      // @ts-expect-error
       this.server = Bun.serve({
         ...options,
         port,
@@ -524,8 +503,7 @@ export class Axeom<
         websocket: {
           open: (ws: any) => ws.data.open?.(ws),
           message: (ws: any, message: any) => ws.data.message?.(ws, message),
-          close: (ws: any, code: number, reason: string) =>
-            ws.data.close?.(ws, code, reason),
+          close: (ws: any, code: number, reason: string) => ws.data.close?.(ws, code, reason),
           error: (ws: any, error: any) => ws.data.error?.(ws, error),
         },
       });
@@ -534,16 +512,16 @@ export class Axeom<
       return this.server;
     }
 
-    // @ts-ignore - Deno detection
+    // @ts-expect-error - Deno detection
     if (typeof Deno !== "undefined" && typeof Deno.serve === "function") {
-      // @ts-ignore
+      // @ts-expect-error
       this.server = Deno.serve({ ...options, port }, async (req) => {
         const res = await this.handle(req);
         if (res.status === 101) {
           const url = new URL(req.url);
           const matched = this.router.match(req.method, url.pathname);
           if (matched && matched.route.metadata?.ws) {
-            // @ts-ignore
+            // @ts-expect-error
             const { socket, response } = Deno.upgradeWebSocket(req);
             const handlers = matched.route.metadata.ws;
             socket.onopen = () => handlers.open?.(socket);

@@ -1,4 +1,4 @@
-import { ForbiddenError, type Axeom } from "@axeom/core";
+import { type Axeom, ForbiddenError } from "@axeom/core";
 
 export type CorsOptions = {
   origin?: string | string[] | ((origin: string) => string | boolean);
@@ -26,10 +26,7 @@ export const cors = (options: CorsOptions = {}) => {
     return false;
   };
 
-  const setCorsHeaders = (
-    resHeaders: Headers,
-    requestOrigin: string | null,
-  ) => {
+  const setCorsHeaders = (resHeaders: Headers, requestOrigin: string | null) => {
     const allowedOrigin =
       origin === "*" || !requestOrigin
         ? typeof origin === "string"
@@ -44,17 +41,13 @@ export const cors = (options: CorsOptions = {}) => {
     if (credentials) resHeaders.set("Access-Control-Allow-Credentials", "true");
   };
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app
       .onBeforeMatch((req) => {
         const requestOrigin = req.headers.get("Origin");
 
         if (requestOrigin && !isOriginAllowed(requestOrigin)) {
-          throw new ForbiddenError(
-            `CORS: Origin ${requestOrigin} is not allowed`,
-          );
+          throw new ForbiddenError(`CORS: Origin ${requestOrigin} is not allowed`);
         }
 
         if (req.method === "OPTIONS") {

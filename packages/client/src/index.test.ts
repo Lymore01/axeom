@@ -43,7 +43,7 @@ describe("Axeom Client Integration", () => {
 
   it("should throw error on validation failure", async () => {
     try {
-      // @ts-ignore - testing runtime error for invalid body
+      // @ts-expect-error - testing runtime error for invalid body
       await client.echo.post({
         body: { text: 123 },
       });

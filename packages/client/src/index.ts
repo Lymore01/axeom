@@ -28,12 +28,8 @@ export type AxeomClient<T extends Record<string, any>> = {
   }>;
 } & {
   // 2. Direct Methods: Handles methods for the current path (e.g., client.get() at root)
-  [M in keyof T as M extends `${infer Method} /`
-    ? MethodName<Method>
-    : never]: (
-    ...args: {} extends T[M]["input"]
-      ? [options?: T[M]["input"]]
-      : [options: T[M]["input"]]
+  [M in keyof T as M extends `${infer Method} /` ? MethodName<Method> : never]: (
+    ...args: {} extends T[M]["input"] ? [options?: T[M]["input"]] : [options: T[M]["input"]]
   ) => Promise<T[M]["output"]>;
 } & {
   // 3. Leaf Segments: Handles final segments (e.g., client.users.get())
@@ -44,14 +40,10 @@ export type AxeomClient<T extends Record<string, any>> = {
         ? never
         : Path
     : never]: {
-    [M in keyof T as M extends `${infer Method} /${K extends `${string} /${infer P}`
-      ? P
-      : never}`
+    [M in keyof T as M extends `${infer Method} /${K extends `${string} /${infer P}` ? P : never}`
       ? MethodName<Method>
       : never]: (
-      ...args: {} extends T[M]["input"]
-        ? [options?: T[M]["input"]]
-        : [options: T[M]["input"]]
+      ...args: {} extends T[M]["input"] ? [options?: T[M]["input"]] : [options: T[M]["input"]]
     ) => Promise<T[M]["output"]>;
   };
 } & {
@@ -112,18 +104,14 @@ export function createAxeomClient<T extends Record<string, any>>(
 
             // Normalizing Base URL for the URL constructor
             const origin =
-              typeof window !== "undefined"
-                ? window.location.origin
-                : "http://localhost";
+              typeof window !== "undefined" ? window.location.origin : "http://localhost";
 
             const baseWithSlash = baseUrl.startsWith("http")
               ? baseUrl
               : origin + (baseUrl.startsWith("/") ? "" : "/") + baseUrl;
 
             const url = new URL(
-              (baseWithSlash.endsWith("/")
-                ? baseWithSlash.slice(0, -1)
-                : baseWithSlash) + fullPath,
+              (baseWithSlash.endsWith("/") ? baseWithSlash.slice(0, -1) : baseWithSlash) + fullPath,
               origin,
             );
 
@@ -141,16 +129,12 @@ export function createAxeomClient<T extends Record<string, any>>(
               headers: {
                 "Content-Type": "application/json",
               },
-              body: requestOptions.body
-                ? JSON.stringify(requestOptions.body)
-                : undefined,
+              body: requestOptions.body ? JSON.stringify(requestOptions.body) : undefined,
             });
 
             if (!response.ok) {
               const text = await response.text();
-              throw new Error(
-                `API Error: ${response.status} ${text || response.statusText}`,
-              );
+              throw new Error(`API Error: ${response.status} ${text || response.statusText}`);
             }
 
             return response.json();

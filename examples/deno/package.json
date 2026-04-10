@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "deno run --allow-net main.ts"
+    "dev": "deno run --allow-net --allow-env --allow-sys --allow-read --sloppy-imports main.ts"
   },
   "devDependencies": {
     "@types/deno": "^2.5.0"
   },
   "dependencies": {
-    "axeom": "workspace:*"
+    "axeom": "workspace:*",
+    "@axeom/swagger": "workspace:*"
   }
 }

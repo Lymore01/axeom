@@ -1,4 +1,4 @@
-name = "Axeom-example"
+name = "axeom-example"
 main = "src/index.ts"
 compatibility_date = "2024-04-03"
 

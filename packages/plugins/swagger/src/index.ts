@@ -35,18 +35,14 @@ export const swagger = (options: SwaggerOptions = {}) => {
   const swaggerPath = options.path || "/swagger.json";
   const uiPath = options.uiPath || "/docs";
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     app.get(swaggerPath, ({ request }) => {
       const routes = app.router.getRoutes();
       const paths: any = {};
 
       const url = new URL(request.url);
       const basePath =
-        request.headers.get("X-Axeom-Base") ||
-        url.pathname.replace(swaggerPath, "") ||
-        "/";
+        request.headers.get("X-Axeom-Base") || url.pathname.replace(swaggerPath, "") || "/";
 
       routes.forEach((route) => {
         // ... rest of path conversion logic ...
@@ -80,16 +76,14 @@ export const swagger = (options: SwaggerOptions = {}) => {
         if (route.schema?.query) {
           const querySchema = (route.schema.query as any).toJSONSchema();
           if (querySchema.properties) {
-            Object.entries(querySchema.properties).forEach(
-              ([name, schema]: [any, any]) => {
-                op.parameters.push({
-                  name,
-                  in: "query",
-                  required: querySchema.required?.includes(name),
-                  schema,
-                });
-              },
-            );
+            Object.entries(querySchema.properties).forEach(([name, schema]: [any, any]) => {
+              op.parameters.push({
+                name,
+                in: "query",
+                required: querySchema.required?.includes(name),
+                schema,
+              });
+            });
           }
         }
 

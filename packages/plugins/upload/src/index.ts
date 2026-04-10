@@ -9,32 +9,32 @@ export interface UploadOptions {
  * and uses the fastest native method to write to disk.
  */
 export async function saveFile(file: File | Blob, path: string) {
-  // @ts-ignore - Bun detection
+  // @ts-expect-error - Bun detection
   if (typeof Bun !== "undefined") {
-    // @ts-ignore
+    // @ts-expect-error
     const { dirname } = await import("node:path");
-    // @ts-ignore
+    // @ts-expect-error
     await (await import("node:fs/promises")).mkdir(dirname(path), {
       recursive: true,
     });
-    // @ts-ignore
+    // @ts-expect-error
     return await Bun.write(path, file);
   }
 
-  // @ts-ignore - Deno detection
+  // @ts-expect-error - Deno detection
   if (typeof Deno !== "undefined" && typeof Deno.writeFile === "function") {
-    // @ts-ignore
+    // @ts-expect-error
     const { dirname } = await import("node:path");
-    // @ts-ignore
+    // @ts-expect-error
     await Deno.mkdir(dirname(path), { recursive: true });
-    // @ts-ignore
+    // @ts-expect-error
     const data = new Uint8Array(await file.arrayBuffer());
-    // @ts-ignore
+    // @ts-expect-error
     return await Deno.writeFile(path, data);
   }
 
   // Node.js detection
-  // @ts-ignore
+  // @ts-expect-error
   if (typeof process !== "undefined" && process.release?.name === "node") {
     // Dynamic import to avoid including fs in Bun/Deno bundles
     const { writeFile, mkdir } = await import("node:fs/promises");
@@ -45,9 +45,7 @@ export async function saveFile(file: File | Blob, path: string) {
     return await writeFile(path, data);
   }
 
-  throw new Error(
-    "[Axeom Upload] Current runtime is not supported for native file writing.",
-  );
+  throw new Error("[Axeom Upload] Current runtime is not supported for native file writing.");
 }
 
 /**
@@ -56,9 +54,7 @@ export async function saveFile(file: File | Blob, path: string) {
  */
 export const uploadPlugin =
   (options: UploadOptions = {}) =>
-  <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app.decorate({
       storage: {
         save: saveFile,

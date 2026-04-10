@@ -6,7 +6,7 @@ describe("Axeom Core Engine", () => {
     const app = new Axeom().get("/ping", () => ({ message: "pong" }));
     const request = new Request("http://localhost/ping");
     const response = await app.handle(request);
-    
+
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ message: "pong" });
   });
@@ -20,7 +20,7 @@ describe("Axeom Core Engine", () => {
           name: s.string(),
           priority: s.enum(["low", "medium", "high"]),
         }),
-      }
+      },
     );
 
     // Valid Request
@@ -45,7 +45,7 @@ describe("Axeom Core Engine", () => {
     expect(result.errors).toContainEqual(
       expect.objectContaining({
         message: expect.stringContaining("Expected one of: low, medium, high"),
-      })
+      }),
     );
   });
 

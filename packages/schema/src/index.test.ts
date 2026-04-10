@@ -40,10 +40,13 @@ describe("Axeom Schema Library", () => {
         name: s.string(),
         description: s.string().optional(),
       });
-      
+
       // With optional field
-      expect(await schema.parse({ name: "A", description: "B" })).toEqual({ name: "A", description: "B" });
-      
+      expect(await schema.parse({ name: "A", description: "B" })).toEqual({
+        name: "A",
+        description: "B",
+      });
+
       // Without optional field
       expect(await schema.parse({ name: "A" })).toEqual({ name: "A" });
     });

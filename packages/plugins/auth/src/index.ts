@@ -1,6 +1,6 @@
 import type { Axeom, Context } from "@axeom/core";
 import { s } from "@axeom/schema";
-import { SignJWT, jwtVerify } from "jose";
+import { jwtVerify, SignJWT } from "jose";
 
 export interface AuthOptions {
   secret: string;
@@ -22,9 +22,7 @@ export const authPlugin = (options: AuthOptions) => {
   const encoder = new TextEncoder();
   const rawSecret = encoder.encode(options.secret);
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app.decorate({
       auth: {
         /**
@@ -69,11 +67,7 @@ export const authPlugin = (options: AuthOptions) => {
  */
 export const bearerGuard = () => {
   return async <T extends Record<string, any>, D extends Record<string, any>>(
-    ctx: Context<
-      any,
-      any,
-      D & { auth: { verify: (t: string) => Promise<User | null> } }
-    >,
+    ctx: Context<any, any, D & { auth: { verify: (t: string) => Promise<User | null> } }>,
   ) => {
     const authHeader = ctx.headers.get("Authorization");
 
@@ -115,10 +109,7 @@ export const bearerGuard = () => {
 /**
  * A helper to register standard login/profile routes.
  */
-export const authRoutes = <
-  T extends Record<string, any>,
-  D extends Record<string, any>,
->(
+export const authRoutes = <T extends Record<string, any>, D extends Record<string, any>>(
   app: Axeom<T, D>,
 ) => {
   // We expect the authPlugin to have been used before this

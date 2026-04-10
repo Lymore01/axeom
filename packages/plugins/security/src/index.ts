@@ -17,9 +17,7 @@ export const securityHeaders = (options: SecurityOptions = {}) => {
     referrerPolicy = "no-referrer-when-downgrade",
   } = options;
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app.onResponse((res) => {
       const headers = new Headers(res.headers);
 
@@ -41,17 +39,13 @@ export const securityHeaders = (options: SecurityOptions = {}) => {
       if (referrerPolicy) {
         headers.set(
           "Referrer-Policy",
-          typeof referrerPolicy === "string"
-            ? referrerPolicy
-            : "no-referrer-when-downgrade",
+          typeof referrerPolicy === "string" ? referrerPolicy : "no-referrer-when-downgrade",
         );
       }
 
       if (hsts) {
-        const maxAge =
-          typeof hsts === "object" ? hsts.maxAge || 15552000 : 15552000;
-        const subDomains =
-          typeof hsts === "object" ? hsts.includeSubDomains !== false : true;
+        const maxAge = typeof hsts === "object" ? hsts.maxAge || 15552000 : 15552000;
+        const subDomains = typeof hsts === "object" ? hsts.includeSubDomains !== false : true;
         headers.set(
           "Strict-Transport-Security",
           `max-age=${maxAge}${subDomains ? "; includeSubDomains" : ""}`,

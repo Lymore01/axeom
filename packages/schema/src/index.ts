@@ -3,9 +3,7 @@
  * A zero-dependency, ultra-lightweight validation library.
  */
 
-type ValidationResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
+type ValidationResult<T> = { success: true; data: T } | { success: false; error: string };
 
 /**
  * Standard Validator interface for Axeom.
@@ -104,10 +102,7 @@ export abstract class AxeomSchema<T> implements Validator<T> {
   /**
    * Adds a custom validation check. Throws if the function returns false.
    */
-  refine(
-    fn: (data: T) => boolean | Promise<boolean>,
-    message = "Invalid value",
-  ): this {
+  refine(fn: (data: T) => boolean | Promise<boolean>, message = "Invalid value"): this {
     return this.transform(async (data) => {
       if (!(await fn(data))) throw new Error(message);
       return data;
@@ -130,9 +125,7 @@ class StringSchema extends AxeomSchema<string> {
       type: "string",
       ...(this._isOptionalVal ? { optional: true } : {}),
       ...(this._isNullable ? { nullable: true } : {}),
-      ...(this._defaultValue !== undefined
-        ? { default: this._defaultValue }
-        : {}),
+      ...(this._defaultValue !== undefined ? { default: this._defaultValue } : {}),
     };
   }
 
@@ -152,10 +145,7 @@ class StringSchema extends AxeomSchema<string> {
   }
 
   email() {
-    this.refine(
-      (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-      "Invalid email address",
-    );
+    this.refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Invalid email address");
     return this;
   }
 
@@ -207,9 +197,7 @@ class NumberSchema extends AxeomSchema<number> {
       type: "number",
       ...(this._isOptionalVal ? { optional: true } : {}),
       ...(this._isNullable ? { nullable: true } : {}),
-      ...(this._defaultValue !== undefined
-        ? { default: this._defaultValue }
-        : {}),
+      ...(this._defaultValue !== undefined ? { default: this._defaultValue } : {}),
     };
   }
 
@@ -252,9 +240,7 @@ class BooleanSchema extends AxeomSchema<boolean> {
       type: "boolean",
       ...(this._isOptionalVal ? { optional: true } : {}),
       ...(this._isNullable ? { nullable: true } : {}),
-      ...(this._defaultValue !== undefined
-        ? { default: this._defaultValue }
-        : {}),
+      ...(this._defaultValue !== undefined ? { default: this._defaultValue } : {}),
     };
   }
 }
@@ -327,9 +313,7 @@ class ObjectSchema<T extends Record<string, Validator>> extends AxeomSchema<Infe
     return {
       type: "object",
       properties,
-      required: Object.keys(this.shape).filter(
-        (key) => !(this.shape[key] as any)._isOptionalVal,
-      ),
+      required: Object.keys(this.shape).filter((key) => !(this.shape[key] as any)._isOptionalVal),
     };
   }
 

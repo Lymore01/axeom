@@ -3,7 +3,7 @@ import type { Logger } from "./types";
 
 export function createPinoLogger(options?: { level?: string }): Logger {
   const pinoLogger = pino({
-    level: options?.level || process.env.LOG_LEVEL || "info",
+    level: options?.level || (typeof process !== "undefined" && process.env.LOG_LEVEL) || "info",
     transport: {
       target: "pino-pretty",
       options: {

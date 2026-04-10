@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-debug.log*
+.wrangler/
+.npm/
 
 # Build outputs
 dist/

@@ -20,10 +20,7 @@ export interface RateLimitOptions {
 }
 
 export interface RateLimitStore {
-  increment: (
-    key: string,
-    windowMs: number,
-  ) => Promise<{ current: number; resetTime: number }>;
+  increment: (key: string, windowMs: number) => Promise<{ current: number; resetTime: number }>;
 }
 
 /**
@@ -55,15 +52,12 @@ export const rateLimit = (options: RateLimitOptions = {}) => {
     windowMs = 60 * 1000, // 1 minute
     limit = 60,
     message = "Too many requests, please try again later.",
-    keyGenerator = (ctx) =>
-      ctx.request.headers.get("x-forwarded-for") || "unknown",
+    keyGenerator = (ctx) => ctx.request.headers.get("x-forwarded-for") || "unknown",
   } = options;
 
   const store = new MemoryStore();
 
-  return <T extends Record<string, any>, D extends Record<string, any>>(
-    app: Axeom<T, D>,
-  ) => {
+  return <T extends Record<string, any>, D extends Record<string, any>>(app: Axeom<T, D>) => {
     return app.onBeforeHandle(async (ctx) => {
       const key = keyGenerator(ctx);
       const { current, resetTime } = await store.increment(key, windowMs);
@@ -85,9 +79,7 @@ export const rateLimit = (options: RateLimitOptions = {}) => {
           headers: {
             ...headers,
             "Content-Type": "application/json",
-            "Retry-After": Math.ceil(
-              (resetTime - Date.now()) / 1000,
-            ).toString(),
+            "Retry-After": Math.ceil((resetTime - Date.now()) / 1000).toString(),
           },
         });
       }

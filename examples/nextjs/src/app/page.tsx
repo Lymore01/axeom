@@ -83,10 +83,7 @@ export default function Home() {
           </span>
         </div>
         <div style={{ fontSize: "0.8rem", color: "#666" }}>
-          STATUS:{" "}
-          <span style={{ color: "#4ade80" }}>
-            {status?.status || "OFFLINE"}
-          </span>
+          STATUS: <span style={{ color: "#4ade80" }}>{status?.status || "OFFLINE"}</span>
         </div>
       </nav>
 
@@ -110,9 +107,7 @@ export default function Home() {
               >
                 POST
               </div>
-              <div style={{ color: "#888", fontSize: "0.8rem" }}>
-                /api/axeom/projects
-              </div>
+              <div style={{ color: "#888", fontSize: "0.8rem" }}>/api/axeom/projects</div>
             </div>
 
             <h3
@@ -191,11 +186,7 @@ export default function Home() {
               >
                 Response
               </h3>
-              {response && (
-                <span style={{ color: "#4ade80", fontSize: "0.75rem" }}>
-                  200 OK
-                </span>
-              )}
+              {response && <span style={{ color: "#4ade80", fontSize: "0.75rem" }}>200 OK</span>}
             </div>
 
             <div
@@ -210,9 +201,7 @@ export default function Home() {
               }}
             >
               {response ? (
-                <pre
-                  style={{ fontSize: "0.85rem", color: "#4ade80", margin: 0 }}
-                >
+                <pre style={{ fontSize: "0.85rem", color: "#4ade80", margin: 0 }}>
                   {JSON.stringify(response, null, 2)}
                 </pre>
               ) : (
@@ -246,10 +235,7 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           {logs.map((log, i) => (
-            <div
-              key={i}
-              style={{ fontSize: "0.75rem", color: i === 0 ? "#fff" : "#555" }}
-            >
+            <div key={i} style={{ fontSize: "0.75rem", color: i === 0 ? "#fff" : "#555" }}>
               {log}
             </div>
           ))}

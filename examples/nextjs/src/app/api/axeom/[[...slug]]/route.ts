@@ -77,11 +77,8 @@ const axeom = new Axeom()
     }
   });
 
-export const { GET, POST, PUT, PATCH, DELETE, OPTIONS } = createNextHandler(
-  axeom,
-  {
-    basePath: "/api/axeom",
-  },
-);
+export const { GET, POST, PUT, PATCH, DELETE, OPTIONS } = createNextHandler(axeom, {
+  basePath: "/api/axeom",
+});
 
 export type App = typeof axeom;

@@ -12,12 +12,9 @@ export interface BunAdapterOptions {
  * Unlike the Express adapter, this connects Axeom directly to the
  * Zig-level HTTP server in Bun, bypassing multiple layers of middleware.
  */
-export function createBunAdapter(
-  Axeom: Axeom<any, any>,
-  options: BunAdapterOptions = {},
-) {
+export function createBunAdapter(Axeom: Axeom<any, any>, options: BunAdapterOptions = {}) {
   // Check if we are running in Bun
-  // @ts-ignore
+  // @ts-expect-error
   if (typeof Bun === "undefined") {
     console.warn(
       "\x1b[33m[Axeom Warning]\x1b[0m createBunAdapter is designed for the Bun runtime.",
@@ -50,8 +47,7 @@ export function createBunAdapter(
     websocket: {
       open: (ws: any) => ws.data.open?.(ws),
       message: (ws: any, message: any) => ws.data.message?.(ws, message),
-      close: (ws: any, code: number, reason: string) =>
-        ws.data.close?.(ws, code, reason),
+      close: (ws: any, code: number, reason: string) => ws.data.close?.(ws, code, reason),
       error: (ws: any, error: any) => ws.data.error?.(ws, error),
     },
 
