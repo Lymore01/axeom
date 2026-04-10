@@ -2,15 +2,22 @@ import pino from "pino";
 import type { Logger } from "./types";
 
 export function createPinoLogger(options?: { level?: string }): Logger {
-  const pinoLogger = pino({
+  const isNode = typeof process !== "undefined" && process.release?.name === "node";
+  
+  const pinoOptions: any = {
     level: options?.level || (typeof process !== "undefined" && process.env.LOG_LEVEL) || "info",
-    transport: {
+  };
+
+  if (isNode) {
+    pinoOptions.transport = {
       target: "pino-pretty",
       options: {
         colorize: true,
       },
-    },
-  });
+    };
+  }
+
+  const pinoLogger = pino(pinoOptions);
 
   return {
     info: (msg: string, obj?: any) => pinoLogger.info(obj, msg),

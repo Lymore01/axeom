@@ -31,7 +31,18 @@ app.get("/error", () => {
 const isBun = typeof Bun !== "undefined";
 // @ts-expect-error
 const isDeno = typeof Deno !== "undefined";
-const runtime = isBun ? "bun" : isDeno ? "deno" : "node";
+const isWorkerd =
+  // @ts-expect-error
+  typeof __IS_WORKERD__ !== "undefined" ||
+  (typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers");
+
+const runtime = isBun
+  ? "bun"
+  : isDeno
+    ? "deno"
+    : isWorkerd
+      ? "workerd"
+      : "node";
 
 console.log(`\x1b[34m[Parity] Running tests on ${runtime}...\x1b[0m`);
 
@@ -42,10 +53,13 @@ async function runTests() {
     const req1 = new Request("http://localhost/ping");
     const res1 = await app.handle(req1);
     const seq1 = res1.headers.get("X-Sequence");
-    const expectedSeq1 = "onBeforeMatch,onBeforeHandle,handler,onAfterHandle,onResponse";
+    const expectedSeq1 =
+      "onBeforeMatch,onBeforeHandle,handler,onAfterHandle,onResponse";
 
     if (seq1 !== expectedSeq1) {
-      console.error(`\x1b[31m[FAILED] Expected ${expectedSeq1}, got ${seq1}\x1b[0m`);
+      console.error(
+        `\x1b[31m[FAILED] Expected ${expectedSeq1}, got ${seq1}\x1b[0m`,
+      );
       exit(1);
     }
     console.log("\x1b[32m[PASSED] Success path matches expectation.\x1b[0m");
@@ -58,12 +72,16 @@ async function runTests() {
     const expectedSeq2 = "onBeforeMatch,onBeforeHandle,handler,onResponse";
 
     if (seq2 !== expectedSeq2) {
-      console.error(`\x1b[31m[FAILED (Error Path)] Expected ${expectedSeq2}, got ${seq2}\x1b[0m`);
+      console.error(
+        `\x1b[31m[FAILED (Error Path)] Expected ${expectedSeq2}, got ${seq2}\x1b[0m`,
+      );
       exit(1);
     }
     console.log("\x1b[32m[PASSED] Error path matches expectation.\x1b[0m");
 
-    console.log(`\x1b[32m[SUCCESS] ALL PARITY CHECKS PASSED ON ${runtime}!\x1b[0m`);
+    console.log(
+      `\x1b[32m[SUCCESS] ALL PARITY CHECKS PASSED ON ${runtime}!\x1b[0m`,
+    );
     exit(0);
   } catch (err) {
     console.error(`\x1b[31m[CRITICAL ERROR] ${err}\x1b[0m`);
@@ -74,10 +92,25 @@ async function runTests() {
 function exit(code: number) {
   // @ts-expect-error
   if (isDeno) Deno.exit(code);
-  // @ts-expect-error
   if (typeof process !== "undefined") process.exit(code);
   // @ts-expect-error
   if (isBun) process.exit(code);
+
+  if (isWorkerd) {
+    console.log(
+      `\x1b[33m[Workerd] Parity check finished with code ${code}\x1b[0m`,
+    );
+  }
 }
 
-runTests();
+if (runtime !== "workerd") {
+  runTests();
+}
+
+export default {
+  async fetch(request: Request) {
+    console.log("\x1b[35m[Workerd] Triggering parity tests...\x1b[0m");
+    await runTests();
+    return new Response("Parity tests complete. Check your terminal.");
+  },
+};
