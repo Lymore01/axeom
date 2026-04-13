@@ -1,0 +1,111 @@
+---
+title: Plugin Ecosystem
+description: Extending the engine without the bloat.
+---
+
+Axeom follows a **Plugin-First Architecture**. The core engine is a tiny, highly-optimized kernel. Everything else—from authentication to auto-generated documentation—lives in the `@axeom/*` ecosystem.
+
+---
+
+## Infrastructure (Hardening)
+
+Make your API production-ready with these essential infrastructure plugins.
+
+- **`@axeom/cors`**: Cross-Origin Resource Sharing made simple.
+- **`@axeom/security`**: Helmet-style security headers (HSTS, CSP, etc.).
+- **`@axeom/rate-limit`**: Protect your endpoints from abuse with memory and Redis stores.
+- **`@axeom/compression`**: Gzip and Brotli support for large responses.
+
+---
+
+## Features (Capabilities)
+
+Add powerful capabilities to your API with zero friction.
+
+- **`@axeom/auth`**: A full suite for JWT, CSRF, Session, and OAuth support.
+- **`@axeom/static`**: High-performance static asset serving with smart caching and ETags.
+- **`@axeom/upload`**: Streamlined handling of `multipart/form-data` and file uploads.
+- **`@axeom/ws`**: **Runtime-Agnostic WebSockets.** Define logic once, deploy anywhere.
+
+---
+
+## Developer Tooling (Observability)
+
+Enhance your development workflow and monitor your engine in real-time.
+
+- **`@axeom/swagger`**: Automatic OpenAPI/Swagger UI generation from your schemas.
+- **`@axeom/logger`**: High-performance structured logging.
+- **`@axeom/metrics`**: Native Prometheus/Grafana export support.
+
+---
+
+## Using a Plugin
+
+Registering a plugin is as simple as calling `.use()`.
+
+```typescript
+import { Axeom } from 'axeom';
+import { cors } from '@axeom/cors';
+
+const app = new Axeom()
+  .use(cors());
+
+app.get("/", () => "CORS Enabled!");
+```
+
+---
+
+## Writing Your Own Plugin
+
+Writing an Axeom plugin is just writing a function that receives the engine instance and returns it (potentially with updated types). Here are three common patterns:
+
+### 1. The Utility Plugin (Decorators)
+Injects a global utility available in every handler.
+
+```typescript
+const loggerPlugin = (prefix: string) => (app: Axeom) => {
+  return app.decorate({
+    log: (msg: string) => console.log(`[${prefix}] ${msg}`)
+  });
+};
+
+app.use(loggerPlugin("GATEWAY"));
+
+app.get("/test", (ctx) => {
+  ctx.log("Handling request..."); // Fully typed!
+  return "OK";
+});
+```
+
+### 2. The Feature Plugin (Multiple Routes)
+Adds multiple routes under a shared logic.
+
+```typescript
+const healthPlugin = () => (app: Axeom) => {
+  return app.group("/health", (health) => {
+    return health
+      .get("/live", () => "OK")
+      .get("/ready", () => ({ status: "ready", uptime: process.uptime() }));
+  });
+};
+
+app.use(healthPlugin());
+```
+
+### 3. The Middleware Plugin (Hooks)
+Injects cross-cutting concerns like authentication.
+
+```typescript
+const simpleAuth = (apiKey: string) => (app: Axeom) => {
+  return app.onBeforeHandle((ctx) => {
+    const key = ctx.headers.get("X-API-KEY");
+    if (key !== apiKey) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+  });
+};
+
+app.use(simpleAuth("top-secret"));
+```
+
+This simple pattern allows for infinite extensibility while maintaining the weightless core. Features that feel like part of the core are actually just well-designed plugins.

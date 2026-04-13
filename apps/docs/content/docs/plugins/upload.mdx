@@ -1,0 +1,66 @@
+---
+title: File Uploads
+description: Unified multi-runtime storage for handled fragments.
+---
+
+The `@axeom/upload` plugin provides a unified way to save files to disk, regardless of whether you are running on **Bun**, **Deno**, or **Node.js**.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/upload
+```
+
+---
+
+## Usage
+
+### 1. Register the Plugin
+Configure a default destination for your uploads.
+
+```typescript
+import { Axeom } from 'axeom';
+import { uploadPlugin } from '@axeom/upload';
+
+const app = new Axeom()
+  .use(uploadPlugin({
+    dest: "./uploads"
+  }));
+```
+
+### 2. Handling Uploads in Routes
+Access the `storage` utility in your context to save incoming files from a `Multipart/Form-Data` request.
+
+```typescript
+app.post("/upload", async (ctx) => {
+  const file = ctx.body.get("avatar") as File;
+  
+  if (file) {
+    const path = `./uploads/${Date.now()}-${file.name}`;
+    await ctx.storage.save(file, path);
+    return { status: "success", path };
+  }
+  
+  return { status: "error" };
+});
+```
+
+---
+
+## Multi-Runtime Implementation
+
+The plugin detects your runtime at startup and uses the most efficient native method for file writing:
+- **Bun**: Uses the high-performance `Bun.write`.
+- **Deno**: Uses the native `Deno.writeFile`.
+- **Node.js**: Uses `node:fs/promises` via dynamic imports to minimize bundle size.
+
+---
+
+## Technical Details
+
+| Property | Description |
+| :--- | :--- |
+| `ctx.storage.save` | An async function accepting a `File` (or `Blob`) and a destination path. |
+| `ctx.storage.defaultDest` | The default directory configured during plugin initialization. |

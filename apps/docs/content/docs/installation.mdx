@@ -1,77 +1,126 @@
 ---
 title: Installation
-description: How to install and configure Keylio in your project
+description: Get up and running with Axeom in seconds.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout'
-import { Card, Cards } from 'fumadocs-ui/components/card'
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-## Overview
+Axeom is designed to be low-friction. You can install it using your favorite package manager.
 
-This guide walks you through installing **Keylio** and integrating it into a modern **Next.js + TypeScript** application using Prisma.
-
-By the end of this page, you will have:
-- Installed Keylio
-- Configured authentication options
-- Connected Keylio to a Next.js API route
-
----
-
-## Beta Status
-
-<Callout type="warning">
-Keylio is currently in <strong>beta</strong>.
-The API is stable, but minor breaking changes may occur before the first stable release.
+<Callout type="tip">
+  For the best experience, we recommend using **Bun** as it provides the fastest startup times and native support for the Axeom engine.
 </Callout>
 
----
+## Install the Meta-Package
 
+For the best experience, we recommend using the `axeom` meta-package, which includes the core engine, the standard schema validator (`s`), and the most common plugins.
 
-## Prerequisites
-
-Before installing Keylio, ensure your environment meets the following requirements:
-
-- **Node.js 18.0.0** or later
-- A **TypeScript** or modern JavaScript project
-- A database setup (for example, Prisma) for persistent sessions
-
-<Callout type="info">
-Keylio is designed for modern Node.js runtimes and provides the best experience with TypeScript.
-</Callout>
-
----
-
-## Installation
-
-Install Keylio using your preferred package manager:
-
-<Tabs items={['npm', 'pnpm', 'yarn']}>
+<Tabs items={['npm', 'pnpm', 'bun']}>
   <Tab value="npm">
-  ```bash
-  npm install keylio@beta
-  ```
+    ```bash
+    npm install axeom
+    ```
   </Tab>
   <Tab value="pnpm">
-  ```bash
-  pnpm add keylio@beta
-  ```
+    ```bash
+    pnpm add axeom
+    ```
   </Tab>
-  <Tab value="yarn">
-  ```bash
-  yarn add keylio@beta
-  ```
+  <Tab value="bun">
+    ```bash
+    bun add axeom
+    ```
   </Tab>
 </Tabs>
 
-## Next Steps
+---
 
-<Cards>
-  <Card title="Quick Start" href="/docs/basic-usage">
-    Real-world usage examples for your application.
-  </Card>
-  <Card title="API Reference" href="/docs/references">
-    Explore all available utilities and methods.
-  </Card>
+## Scaffolding a New Project
 
-</Cards>
+The fastest way to start a new Axeom project is using our interactive CLI:
+
+```bash
+npx create-axeom@latest ./my-app
+```
+
+This will guide you through choosing a runtime (Bun, Node, Deno) and an architectural template (Monolith, Microservice, or Library).
+
+---
+
+## Manual Setup
+
+If you prefer to set things up manually, start by creating a main file (e.g., `index.ts`):
+
+```typescript
+import { Axeom } from 'axeom';
+
+const app = new Axeom();
+
+app.get("/", () => "Welcome to the Weightless World.");
+
+// Export the type for your frontend client
+export type AppType = typeof app;
+
+export default app;
+```
+
+---
+
+## Runtime Configuration
+
+Axeom's "Write Once" philosophy means you don't need different code for different runtimes. The engine automatically detects its environment.
+
+### For Bun & Deno (Native)
+Direct support is built-in. Just call `.listen()` and the engine will ignite the native server for you.
+
+```typescript
+import { Axeom } from 'axeom';
+
+const app = new Axeom();
+
+app.get("/", () => "Weightless & Native.");
+
+// Just listen. Axeom detects if it's Bun or Deno automatically.
+app.listen(3000);
+```
+
+### For Node.js (Express)
+Because Node.js lacks a native Fetch-based server, you use the Express adapter to bridge the gap.
+
+```bash
+npm install @axeom/express
+```
+
+```typescript
+import { createExpressAdapter } from '@axeom/express';
+import express from 'express';
+
+const server = express();
+server.use(createExpressAdapter(app)); // 'app' is your Axeom instance
+server.listen(3000);
+```
+
+### For Next.js
+Integrating with Next.js is just as simple, allowing you to share types between your backend and frontend.
+
+```typescript
+// app/api/[[...axeom]]/route.ts
+import { createNextHandler } from 'axeom/web';
+import app from '@/server';
+
+export const { GET, POST, PUT, DELETE, PATCH } = createNextHandler(app);
+```
+
+
+---
+
+## Technical Requirements
+
+To maintain peak performance, Axeom requires:
+- **TypeScript 5.0+**
+- **Node.js 18+** (if not using Bun or Deno)
+
+<Callout type="info">
+  Axeom uses static type analysis to provide E2E safety. Ensure your `tsconfig.json` has `strict` mode enabled for the best experience.
+</Callout>

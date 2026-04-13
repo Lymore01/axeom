@@ -1,5 +1,27 @@
 {
-  "title": "guide",
-  "root": true,
-  "pages": ["introduction", "installation", "basic-usage", "references"]
+  "title": "Axeom Core",
+  "pages": [
+    "introduction",
+    "installation",
+    "---Architecture---",
+    "architecture/core-concepts",
+    "architecture/handshake-pattern",
+    "deep-dive/type-safety",
+    "---The Engine---",
+    "features/routing",
+    "features/context",
+    "features/validation",
+    "features/hooks",
+    "features/websockets",
+    "features/sse",
+
+    "---The Client---",
+    "deep-dive/proxy-client",
+    "---Ecosystem---",
+    "plugins",
+    "runtimes/overview",
+    "---Philosophy---",
+    "comparisons",
+    "references"
+  ]
 }

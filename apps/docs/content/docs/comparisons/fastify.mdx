@@ -1,0 +1,253 @@
+---
+title: Axeom vs. Fastify
+description: The ultimate showdown between the Node.js standard and the weightless engine.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Fastify is the industry standard for high-performance Node.js development. Axeom takes inspiration from Fastify's speed but re-imagines the architecture for the **Fetch API** era, slashing bundle size and removing Node-specific lock-in.
+
+---
+
+## Routing & Handlers
+Axeom uses a standard REST-first approach and exposes a unified context object that works across all runtimes.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Unified Context handler
+app.get('/ping', () => {
+  return "pong";
+});
+
+app.post('/data', ({ body }) => {
+  return body;
+});
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Proprietary req/reply objects
+fastify.get('/ping', async (req, reply) => {
+  return "pong";
+});
+
+fastify.post('/data', async (req, reply) => {
+  return req.body;
+});
+```
+</SideBySide>
+
+---
+
+## Validation & Type Safety
+Axeom provides Zero-CodeGen Type Safety through its native `s` schema utility. Axeom's types are perfectly inferred at runtime and shared with the client without extra steps.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Native schema-to-type inference
+app.post('/user', ({ body }) => {
+  return body.id; // Fully typed
+}, {
+  body: s.object({ id: s.number() })
+});
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+import { Type } from '@sinclair/typebox';
+const fastify = Fastify();
+
+// Requires TypeBox or JSON Schema
+const schema = {
+  body: Type.Object({ id: Type.Number() })
+};
+
+fastify.post('/user', { schema }, (req) => {
+  return req.body.id;
+});
+```
+</SideBySide>
+
+---
+
+## File Upload
+Axeom handles file uploads through a unified `storage` abstraction, making file saving identical on Bun, Deno, and Node.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Native storage abstraction
+app.post('/upload', async (ctx) => {
+  const { image } = ctx.body;
+  await ctx.storage.save(image, `uploads/${image.name}`);
+  return "Saved";
+}, {
+  body: s.object({ image: s.file() })
+});
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Requires fastify-multipart
+fastify.register(import('@fastify/multipart'));
+fastify.post('/upload', async (req) => {
+  const data = await req.file();
+  // Manual pump/fs required
+  return "Saved";
+});
+```
+</SideBySide>
+
+---
+
+## Lifecycle & Interceptors
+Fastify uses an onion-model middleware. Axeom uses a Flattened Hook System (`onRequest`, `onResponse`) and `.derive()` for data injection.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Flat Hooks & Derivations
+app.derive(() => ({ user: 'axeom' }))
+   .onRequest((ctx) => {
+     console.log(ctx.request.url);
+   });
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Nested hooks
+fastify.addHook('onRequest', (req, reply, done) => {
+  console.log(req.url);
+  done();
+});
+```
+</SideBySide>
+
+---
+
+## Encapsulation (Grouping)
+Axeom's grouping system is designed for isolation without the complexity of Fastify's plugin decorators.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Functional grouping
+app.group('/v1', (v1) => {
+  v1.get('/info', () => "v1");
+});
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Plugin encapsulation
+fastify.register((instance, opts, done) => {
+  instance.get('/info', () => "v1");
+  done();
+}, { prefix: '/v1' });
+```
+</SideBySide>
+
+---
+
+## Error Handling
+Axeom utilizes a unified error interceptor that works seamlessly with standard JavaScript rejections.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Direct rejection handling
+app.get('/err', () => {
+  throw new Error("Critical Failure");
+});
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Error handler hook
+fastify.setErrorHandler((error, request, reply) => {
+  reply.status(500).send({ ok: false });
+});
+```
+</SideBySide>
+
+---
+
+## OpenAPI & Documentation
+In Axeom, documentation is a byproduct of your schemas via the `@axeom/swagger` plugin.
+
+<SideBySide leftLabel="Axeom" rightLabel="Fastify">
+```typescript twoslash
+// @noErrors
+// Native Swagger Plugin
+import Axeom from 'axeom';
+import { swagger } from "@axeom/swagger";
+const app = new Axeom();
+
+app.use(swagger()); 
+// Documentation is automatic 
+// via s.object() schemas.
+```
+
+```typescript twoslash
+// @noErrors
+import Fastify from 'fastify';
+const fastify = Fastify();
+
+// Requires manual schema tags
+fastify.register(import('@fastify/swagger'));
+fastify.get('/ping', {
+  schema: {
+    description: 'ping',
+    response: { 200: { type: 'string' } }
+  }
+}, async () => "pong");
+```
+</SideBySide>
+
+---
+
+## Summary: Why Axeom Wins
+
+| Feature | Fastify | Axeom |
+| :--- | :--- | :--- |
+| **Runtime** | Node.js Only | Universal (Edge, Bun, Deno, Node) |
+| **Core Size** | ~200KB (Transitive) | ~10KB (Zero Deps) |
+| **Protocol** | Proprietary Abstraction | Standard Fetch API |
+| **Complexity** | High (Decorators, Plugins) | Low (Hooks, Groups) |
+| **Type Safety** | Third-party (TypeBox/Zod) | Native (s Utility) |

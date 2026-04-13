@@ -1,180 +1,397 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
 
 @theme {
   --font-sans: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-
-  /* Obsidian Overrides */
-  --color-fd-background: transparent;
-  --color-fd-primary: #ffffff;
-  --color-fd-primary-foreground: #000000;
-  --color-fd-border: rgba(255, 255, 255, 0.08);
-
-  /* Force Dark Theme Variables */
-  --background: 0 0% 0%;
-  --foreground: 0 0% 98%;
-  --border: 0 0% 14.9%;
-  --muted: 0 0% 12%;
-  --accent: 0 0% 14.9%;
 }
 
-@layer base {
-  * {
-    border-color: rgba(255, 255, 255, 0.08);
-  }
+/* --- TWOSLASH OBSIDIAN HUD --- */
 
-  body {
-    background-color: #000000;
-    color: hsl(var(--foreground));
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-  }
+/* --- 01. FUNDAMENTAL RESET --- */
+body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* Segmented Better-Auth Style Nav */
-  .fd-nav {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background-color: transparent !important;
-    backdrop-filter: blur(8px) !important;
-    height: 3.5rem !important;
-    padding: 0 !important;
-  }
+/* Restored High-Fidelity Blueprint Lines */
+.blueprint-line-h {
+  position: absolute;
+  left: -10vw;
+  right: -10vw;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.05) 10%,
+    rgba(255, 255, 255, 0.05) 90%,
+    transparent
+  );
+  pointer-events: none;
+}
 
-  /* Target the internal container(s) of the nav */
-  .fd-nav > div,
-  .fd-nav-container {
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex !important;
-    height: 100% !important;
-  }
+.blueprint-line-v {
+  position: absolute;
+  top: -15vh;
+  bottom: -15vh;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 255, 255, 0.05) 10%,
+    rgba(255, 255, 255, 0.05) 90%,
+    transparent
+  );
+  pointer-events: none;
+}
 
-  /* Universal Cell Styling for ANY Link in Nav */
-  .fd-nav a {
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    padding: 0 1.25rem !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-    font-family: var(--font-mono) !important;
-    font-size: 10px !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.15em !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    transition: background 0.2s ease !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
+.blueprint-label {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  pointer-events: none;
+}
 
-  .fd-nav a:hover {
-    background-color: rgba(255, 255, 255, 0.03) !important;
-    color: #ffffff !important;
-  }
+/* Global Noise Overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3col%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
+}
 
-  /* Logo Exception: Bold & White */
-  .fd-nav a[href="/"] {
-    font-weight: 700 !important;
-    color: #ffffff !important;
-    font-size: 14px !important;
-    padding: 0 1.5rem !important;
-  }
+/* --- 03. THE OBSIDIAN OVERRIDE (EXPLICIT LATE-AUTH) --- */
 
-  /* Ensure the Actions container (GitHub area) also adheres to grid */
-  .fd-nav .flex-1,
-  .fd-nav .ms-auto {
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    margin: 0 !important;
-  }
+:root,
+[data-theme="dark"] {
+  --color-fd-background: 0 0% 0% !important;
+  --color-fd-sidebar: 0 0% 2% !important;
+  --color-fd-primary: 0 0% 100% !important;
+  --color-fd-muted: 0 0% 40% !important;
 
-  .fd-nav .flex-1 > div,
-  .fd-nav .ms-auto > div {
-    height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
+  --color-fd-sidebar-foreground: 0 0% 50% !important;
+  --color-fd-sidebar-border: 0 0% 5% !important;
+}
 
-  /* Global Noise Overlay */
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.04;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3col%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
-  }
+.fd-sidebar,
+[data-sidebar="true"],
+aside {
+  background-color: #050505 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
 
-  /* Blueprint Lines */
-  .blueprint-line-h {
-    position: absolute;
-    left: -10vw;
-    right: -10vw;
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      rgba(255, 255, 255, 0.05) 10%,
-      rgba(255, 255, 255, 0.05) 90%,
-      transparent
-    );
-    pointer-events: none;
-  }
+.fd-sidebar a,
+[data-sidebar] a {
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.2rem !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  border-radius: 0 !important;
+  border-left: 2px solid transparent !important;
+  padding: 0.75rem 1.5rem !important;
+  margin: 0 !important;
+}
 
-  .blueprint-line-v {
-    position: absolute;
-    top: -15vh;
-    bottom: -15vh;
-    width: 1px;
-    background: linear-gradient(
-      to bottom,
-      transparent,
-      rgba(255, 255, 255, 0.05) 10%,
-      rgba(255, 255, 255, 0.05) 90%,
-      transparent
-    );
-    pointer-events: none;
-  }
+.fd-sidebar a:hover,
+.fd-sidebar a[data-active="true"] {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+}
 
-  .blueprint-label {
-    position: absolute;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.15);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    pointer-events: none;
-    white-space: nowrap;
-  }
+[role="option"] mark {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
 
-  /* Premium Obsidian Scrollbar */
-  .axeom-scroll::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
+/* --- 10. SIDE-BY-SIDE COMPARISON UTILITIES --- */
+.prose-no-margin figure {
+  margin: 0 !important;
+  border: none !important;
+}
 
-  .axeom-scroll::-webkit-scrollbar-track {
-    background: transparent;
-  }
+.prose-no-margin pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}
 
-  .axeom-scroll::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 20px;
-    transition: background 0.2s ease;
-  }
+.side-by-side-container figure {
+  border: none !important;
+  border-radius: 0 !important;
+}
 
-  .axeom-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
+.fd-sidebar h2,
+.fd-sidebar .fd-sidebar-group-title {
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  color: rgba(255, 255, 255, 0.1) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.35em !important;
+  padding-top: 2rem !important;
+}
 
-  .axeom-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
-  }
+/* --- 02. HUD & BLUEPRINT SYSTEM --- */
+
+.fd-nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important; /* Dimmed Border */
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* High-Precision Card Schematic (Aggressive Targeting) */
+.fd-card,
+[data-card="true"],
+.prose .fd-card,
+a[class*="fd-card"] {
+  background-color: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+.fd-card:hover,
+[data-card="true"]:hover {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background-color: #080808 !important;
+}
+/* Target every Code Block Figure inside a Tab or Group */
+[role="tabpanel"] figure,
+.fd-tabs-content figure,
+[dir="ltr"],
+figure.fd-codeblock {
+  background-color: #050505 !important;
+  border-radius: 0px !important;
+  background-size: 20px 20px !important;
+}
+
+[role="tablist"] {
+  background-color: #050505 !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0px !important;
+}
+
+/* Target every Flex-based Callout/Card inside Prose */
+.prose div.flex.gap-2.border {
+  background-color: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-style: dashed !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  background-size: 24px 24px !important;
+}
+
+/* Prose Aesthetics */
+.prose {
+  max-width: 85ch !important;
+}
+.prose h1 {
+  font-weight: 900 !important;
+  letter-spacing: -0.07rem !important;
+  color: #ffffff !important;
+  font-size: 3.5rem !important;
+}
+.docs-layout #nd-sidebar > div:first-child > .flex:first-child {
+  display: none;
+}
+
+div.\@container.bg-fd-card {
+  background-color: #050505 !important;
+  background-size: 24px 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0px !important;
+}
+
+/* Parameter Row Precision */
+div.\@container.bg-fd-card div[data-state] {
+  border-radius: 0px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background-color: transparent !important;
+}
+
+div.\@container.bg-fd-card div[data-state]:last-of-type {
+  border-bottom: none !important;
+}
+
+div.\@container.bg-fd-card button[data-state]:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+div.\@container.bg-fd-card code {
+  font-family: var(--font-mono) !important;
+  font-size: 0.9em !important;
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+.lp-pre {
+  font-family: var(--font-mono) !important;
+  background-color: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- 05. PREMIUM OBSIDIAN SCROLLBAR --- */
+.axeom-scroll::-webkit-scrollbar {
+  width: 3px !important;
+  height: 3px !important;
+}
+
+.axeom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+}
+
+.axeom-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.axeom-scroll {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent !important;
+}
+
+/* --- 06. INDUSTRIAL TABLE SYSTEM --- */
+.prose table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-family: var(--font-sans) !important;
+  margin: 2rem 0 !important;
+  background-color: #050505 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0px !important;
+  font-size: 13px !important;
+}
+
+.prose thead {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.prose thead th {
+  color: #ffffff !important;
+  font-family: var(--font-mono) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1rem !important;
+  font-size: 11px !important;
+  padding: 1.25rem 1.5rem !important;
+  text-align: left !important;
+  font-weight: 700 !important;
+}
+
+.prose tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.prose tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+.prose tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.prose td {
+  padding: 1rem 1.5rem !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  line-height: 1.6 !important;
+}
+
+.prose td strong {
+  color: #ffffff !important;
+  font-family: var(--font-mono) !important;
+  font-weight: 600 !important;
+}
+
+.prose td code {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 0px !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+}
+
+/* --- 07. HUD PAGE ACTIONS --- */
+.axeom-page-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  font-family: var(--font-mono) !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 0.6rem 1rem !important;
+  background-color: transparent !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.axeom-page-action:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.axeom-action-group {
+  display: flex !important;
+  gap: 1px !important; /* Stack together for a mechanical feel */
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  padding: 1px !important;
+  width: fit-content !important;
+  margin-top: 4rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.03) !important;
+}
+
+.axeom-action-group .axeom-page-action {
+  border: none !important;
+  background-color: #000000 !important;
+}
+
+/* --- 08. OBSIDIAN SEARCH OVERRIDES --- */
+[data-search-full] {
+  border-radius: 0px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #050505 !important;
+  padding: 0.6rem 1rem !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  transition: all 0.2s ease !important;
+  font-size: medium !important;
+}
+
+[data-search-full]:hover {
+  background-color: #080808 !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+[data-search-full] kbd {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 2px !important; /* Extremely slight rounding for mechanical feel */
+  font-family: var(--font-mono) !important;
+  font-size: 9px !important;
+  padding: 0.2rem 0.4rem !important;
+}
+
+/* Hide the default search icon if it doesn't fit the vibe */
+[data-search-full] svg {
+  opacity: 0.4 !important;
 }

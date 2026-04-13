@@ -1,0 +1,75 @@
+---
+title: Authentication
+description: Built-in JWT authentication and authorization guards.
+---
+
+The `@axeom/auth` plugin provides a robust JWT-based authentication system using the `jose` library. It includes utilities for signing tokens, verifying them, and protecting routes with the `bearerGuard`.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/auth
+```
+
+---
+
+## Usage
+
+### 1. Register the Plugin
+Register the plugin with a secret key. This adds an `auth` utility to your request context.
+
+```typescript
+import { Axeom } from 'axeom';
+import { authPlugin } from '@axeom/auth';
+
+const app = new Axeom()
+  .use(authPlugin({
+    secret: "super-secret-key",
+    issuer: "my-app",
+    expiresIn: "2h"
+  }));
+```
+
+### 2. Protecting Routes
+Use the `bearerGuard` derivation to protect specific route groups.
+
+```typescript
+import { bearerGuard } from '@axeom/auth';
+
+app.group("/admin", (admin) => {
+  return admin
+    .derive(bearerGuard()) // Protects all routes in this group
+    .get("/dashboard", ({ user }) => {
+      return `Welcome back, ${user.name}`;
+    });
+});
+```
+
+### 3. Signing Tokens
+Generate new tokens inside your login handlers using the context decorator.
+
+```typescript
+app.post("/login", async (ctx) => {
+  const { username } = ctx.body;
+  
+  // Logic to verify user password...
+  
+  const token = await ctx.auth.sign({ 
+    id: "user_1", 
+    role: "admin", 
+    name: username 
+  });
+  
+  return { token };
+});
+```
+
+---
+
+## Technical Features
+
+- **Runtime Agnostic**: Powered by `jose`, it runs anywhere without Node-specific dependencies.
+- **Strictly Typed**: User payloads are typed throughout the application.
+- **Flexible Expiry**: Supports standard JWT expiration strings (e.g., `1d`, `2h`, `30m`).

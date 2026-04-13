@@ -1,0 +1,41 @@
+---
+title: Static Files
+description: High-performance asset serving with security baked-in.
+---
+
+The `@axeom/static` plugin allows you to serve local files (images, scripts, styles) with support for ETag caching and path-traversal protection.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/static
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { staticPlugin } from '@axeom/static';
+
+const app = new Axeom()
+  .use(staticPlugin({
+    prefix: "/public",      // URL path to match
+    rootPath: "./public",   // Local directory to serve from
+    maxAge: 86400           // Cache results for 24 hours
+  }));
+```
+
+In the example above, a file located at `./public/img/logo.png` will be served at `http://localhost:3000/public/img/logo.png`.
+
+---
+
+## Features
+
+- **ETag Caching**: Automatically generates weak ETags based on file size and modification time to save bandwidth.
+- **Traversal Protection**: Normalizes paths to prevent "Double Dot" (`../`) attacks, ensuring requests stay within the defined root directory.
+- **MIME Type Detection**: Built-in support for all modern web formats (WebP, WOFF2, MP4, etc.).
+- **304 Not Modified**: Correctly handles `If-None-Match` headers to leverage browser caches efficiently.

@@ -1,0 +1,50 @@
+---
+title: Logger
+description: High-performance observability for every request.
+---
+
+The `@axeom/logger` plugin provides industrial-grade request/response logging powered by **Pino**. It automatically tracks request methods, paths, status codes, and execution duration.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/logger
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { logger } from '@axeom/logger';
+
+const app = new Axeom().use(logger());
+
+app.get("/", (ctx) => {
+  ctx.logger.info("Custom event inside handler");
+  return "OK";
+});
+```
+
+---
+
+## Output Example
+
+The logger provides consistent, machine-readable output:
+
+```bash
+[2024-04-13T12:00:00.000Z] INFO (12345): GET /api/users 200 - 4.521ms
+[2024-04-13T12:00:01.000Z] INFO (12345): POST /auth/login 401 - 12.112ms
+```
+
+---
+
+## Features
+
+- **Pino Powered**: Utilizes the fastest JSON logger for Node.js/Bun.
+- **Precision Timing**: Logs the exact duration of each request using high-resolution performance timers.
+- **Context Integration**: Injects the `logger` instance into every request `ctx`, allowing for structured logging inside your handlers.
+- **Customizable**: Pass your own Pino instance for advanced transport or configuration.

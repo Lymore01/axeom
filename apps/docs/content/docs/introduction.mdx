@@ -1,81 +1,70 @@
 ---
 title: Introduction
-description: A modern utility library for authentication and cryptographic workflows
+description: The Weightless Engine for Heavy-Duty APIs.
 ---
 
 import { Callout } from 'fumadocs-ui/components/callout'
 import { Card, Cards } from 'fumadocs-ui/components/card'
-import { Braces, Fingerprint, Key, Lock } from 'lucide-react'
+import { Box, Cpu, Globe, Lock, Shield, Zap } from 'lucide-react'
 
-**Keylio** is a modern, type-safe utility library that simplifies **authentication** and **cryptographic operations** in Node.js and TypeScript applications.
+**Axeom** is the first truly weightless web framework designed for the multi-runtime era. Built on the principle of **Zero-Code-Gen Type Safety**, Axeom provides a unified, ultra-fast experience that runs natively on **Bun**, **Deno**, **Next.js**, and **Node.js** without compromise.
 
-It provides a unified, developer-friendly API for common security tasks, allowing you to focus on building features instead of wiring low-level libraries together.
+Traditional frameworks often come with heavy abstractions and "magic" code generation that slows down both development and runtime. Axeom takes a different path: **Static Transparency**. We move the heavy lifting to the initialization phase, leaving your request lifecycle as lean as a raw Fetch handler.
 
-<Callout type="info">
-Keylio is designed to be simple, opinionated, and production-ready - without locking you into complex abstractions.
-</Callout>
-
-<Callout type="warn" title="Adapter Support">
-  Currently, Keylio exclusively supports **Prisma** adapters. Support for other database adapters is still in development.
+<Callout type="info" title="The Ultra-Lean Philosophy">
+  Axeom isn't just a framework; it's a performance strategy. By using a Micro-Kernel architecture, you only pay for the features you actually use.
 </Callout>
 
 ---
 
-## What Keylio Solves
+## Why Choose Axeom?
 
-In many projects, authentication logic quickly becomes fragmented across multiple libraries and configurations. Keylio brings these concerns together under a **single, consistent interface**, reducing boilerplate and potential security pitfalls.
-
-Instead of managing raw dependencies and repetitive setup, you get sensible defaults and a clean API out of the box.
-
----
-
-## Core Features
-
-Keylio provides utilities for the most common security-related workflows:
+In a fragmented ecosystem of runtimes and edge providers, Axeom is your single source of truth.
 
 <Cards>
-  <Card title="Password Hashing" icon={<Lock />}>
-    Secure password hashing and verification built on top of **bcrypt**.
+  <Card title="Zero-Code-Gen" icon={<Shield />}>
+    End-to-end type safety directly from your server routes to your client, with *nothing* to generate.
   </Card>
 
-  <Card title="Token Management" icon={<Key />}>
-    Generate and validate JSON Web Tokens (JWT) using **jsonwebtoken**.
+  <Card title="Multi-Runtime" icon={<Globe />}>
+    Write once, deploy anywhere. Full support for Bun, Deno, Node.js, Next.js, and Cloudflare Workers.
   </Card>
 
-  <Card title="Identity Utilities" icon={<Fingerprint />}>
-    Create unique, collision-resistant identifiers powered by **uuid**.
+  <Card title="High Velocity" icon={<Zap />}>
+    Binary-fast Radix routing and a mutable lifecycle that's optimized for modern JIT engines.
   </Card>
 
-  <Card title="Type Safety" icon={<Braces />}>
-    Fully written in TypeScript with strong typing across all public APIs.
+  <Card title="Runtime-Agnostic WebSockets" icon={<Cpu />}>
+    The first framework to offer uniform WebSocket logic that bridges the gap between different runtime engines.
+  </Card>
+
+  <Card title="Security First" icon={<Lock />}>
+    Hardened headers, rate limiting, and CORS support available as plug-and-play modules.
+  </Card>
+
+  <Card title="Modular by Design" icon={<Box />}>
+    A tiny core engine (~10KB) that expands only when you need it to. No hidden bloat.
   </Card>
 </Cards>
 
 ---
 
-## Who Is Keylio For?
+## The "Blueprint" Approach
 
-Keylio is ideal for:
+Axeom treats your API as a **Blueprint**. You define the structure, the validation, and the logic. Axeom then compiles this blueprint into a high-performance execution tree. This approach ensures that your types are always in sync with your runtime behavior.
 
-- Backend developers building Node.js or TypeScript APIs
-- Projects that need **simple but secure authentication utilities**
-- Teams that value **clarity, type safety, and maintainability**
-- Developers who want fewer dependencies and less configuration noise
-
-
-<Callout type="tip">
-You don’t need to adopt everything at once - Keylio utilities can be used independently.
-</Callout>
+- **Non-Invasive**: Use standard `Request` and `Response` objects.
+- **winterTC Compliant**: Future-proof your stack with web standards.
+- **Static Refinement**: Optimization happens at startup, not per-request.
 
 ---
 
-## Next Steps
+## Get Started in 60 Seconds
+
+Ready to feel the lack of gravity? Start your journey with Axeom today.
 
 <Cards>
-  <Card title="Installation" href="/docs/installation">
-    Get started with Keylio in just a few steps.
-  </Card>
-  <Card title="Basic Usage" href="/docs/basic-usage">
-    Get started with Keylio in just a few steps.
-  </Card>
+  <Card title="Quick Start Installation" href="/docs/installation" />
+  <Card title="Architecture Deep Dive" href="/docs/architecture/core-concepts" />
 </Cards>
+

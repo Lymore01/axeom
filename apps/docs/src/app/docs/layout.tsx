@@ -6,6 +6,7 @@ import React from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { nav, ...base } = baseOptions();
+
   return (
     <DocsLayout
       tree={source.pageTree}

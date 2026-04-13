@@ -9,7 +9,7 @@ export function baseOptions(): BaseLayoutProps {
       transparentMode: "always",
     },
     searchToggle: {
-      enabled: false,
+      enabled: true,
     },
     themeSwitch: {
       enabled: false,
@@ -20,7 +20,7 @@ export function baseOptions(): BaseLayoutProps {
         on: "nav",
         children: (
           <a href="/docs" className="text-sm font-medium text-white">
-            Documentation
+            Documentations
           </a>
         ),
       },

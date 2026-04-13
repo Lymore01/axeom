@@ -1,0 +1,99 @@
+---
+title: Client & E2E Type Safety
+description: Using the Proxy Client for high-productivity development.
+---
+
+The `AxeomClient` isn't just a fetch wrapper—it is a **Type-Level Mirror** of your server. It eliminates the friction of manual URL construction and ensures that your frontend is always in perfect sync with your backend.
+
+---
+
+## Getting Started
+
+The client is ultra-lightweight and works in any environment (Browser, React Native, Node.js). To get started, you just need your server's `AppType`.
+
+```typescript
+// server.ts
+const app = new Axeom();
+export type AppType = typeof app;
+
+// client.ts
+import { createAxeomClient } from 'axeom/client';
+import type { AppType } from './server';
+
+// The client is fully typed based on AppType!
+const client = createAxeomClient<AppType>("https://api.axeom.dev");
+```
+
+---
+
+## Chaining Routes
+
+Axeom uses a fluent Proxy API. Instead of strings, you use property access to "walk" your routes.
+
+### Static Paths
+```typescript
+// GET /v1/status
+const status = await client.v1.status.get();
+
+// POST /auth/login
+const session = await client.auth.login.post({
+  body: { username: "admin", password: "password" }
+});
+```
+
+### Path Parameters
+When a route contains a parameter (e.g., `:id`), you can call the segment as a function to provide the value.
+
+```typescript
+// GET /users/:id/profile
+const profile = await client.users("user_123").profile.get();
+
+// Nested Parameters: /posts/:post_id/comments/:comment_id
+const comment = await client.posts("post_45").comments("comment_9").get();
+```
+
+---
+
+## Unified Request Options
+
+Every terminal method (`get`, `post`, `put`, `patch`, `delete`) accepts a standardized options object. Because of the **Registry Pattern**, these options are strictly typed.
+
+```typescript
+const result = await client.search.get({
+  query: { 
+    q: "weightless engine",
+    limit: 10 
+  },
+  headers: {
+    "X-Engine-Token": "AXEOM_REDACTED"
+  }
+});
+```
+
+---
+
+## Why it feels like Magic
+
+The magic of the Axeom Client isn't in its runtime (which is just ~500 bytes of Proxy logic), but in its **TypeScript Orchestration**:
+
+1.  **Autocomplete**: Your IDE knows every route, method, and schema.
+2.  **Refactoring**: Rename a route on the server, and every client reference will immediately show a type error.
+3.  **No Code-Gen**: Save your repo from bloated generated files. The type is the source of truth.
+
+---
+
+## Best Practices
+
+- **Shared Types**: In a monorepo, you can import the `AppType` directly. In poly-repos, you can publish a tiny package containing only the type definition.
+- **Global Instance**: Create a single client instance and export it as your API entry point.
+- **Error Handling**: Use standard `try/catch` and let the client convert API errors into typed exceptions.
+
+```typescript
+try {
+  const data = await client.users.get();
+} catch (e) {
+  // Handle typed AxeomError
+  console.error("Engine failure:", e.message);
+}
+```
+

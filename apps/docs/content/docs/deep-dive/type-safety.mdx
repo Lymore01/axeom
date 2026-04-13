@@ -1,0 +1,80 @@
+---
+title: Zero-Code-Gen Type Safety
+description: How Axeom moves the heavy lifting to the type system.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Axeom's most unique feature is its ability to provide full End-to-End (E2E) type safety from your server definitions to your frontend client **without a build step or code generation**. 
+
+---
+
+## The Registry Pattern
+
+Most frameworks treat the app instance as a simple class. In Axeom, the class is a **Recursive Type Builder**. Every time you call `.get()`, `.post()`, or `.use()`, you aren't just calling a function; you are **refining the type of the instance itself**.
+
+### The Anatomy of an Axeom Type
+```typescript
+interface Axeom<T> {
+  // T is the "Registry" - an object containing every route and its schema
+}
+```
+
+When you define a route, Axeom uses **Template Literal Types** to update the registry:
+
+```typescript
+// Before: Axeom<{}>
+app.get("/users/:id", () => { ... })
+// After: Axeom<{ "GET /users/:id": { input: { params: { id: string } }, output: User } }>
+```
+
+---
+
+## Automatic Schema Inference
+
+Axeom integrates deeply with its built-in schema utility to synchronize your runtime validation with your TypeScript types.
+
+```typescript
+import { s } from "axeom";
+
+const UserSchema = s.object({ name: s.string() });
+
+app.post("/users", (ctx) => {
+  const data = ctx.body; // Fully typed: { name: string }
+  return data;
+}, { body: UserSchema });
+```
+
+
+Because Axeom captures the schema in the **Registry Type**, the frontend client instantly knows that `POST /users` requires a body matching `UserSchema`.
+
+---
+
+## The Extraction Engine
+
+Axeom uses complex recursive types to "scan" your route paths at compile-time.
+
+```typescript
+export type ExtractParams<T> = T extends `${string}/:${infer P}/${infer Rest}`
+  ? P | ExtractParams<`/${Rest}`>
+  : T extends `${string}/:${infer P}`
+    ? P
+    : never;
+```
+
+This utility ensures that if you define a path as `/posts/:post_id/comments/:comment_id`, the type system will **require** you to provide both `post_id` and `comment_id` when calling the API from the client.
+
+---
+
+## Why No Code-Gen?
+
+Traditional tools like OpenAPI (Swagger) or GraphQL require you to run a CLI tool to generate client types every time your server changes. 
+
+In Axeom, **the type is the source of truth.**
+- **Instant**: Change a route on the server, and your frontend client shows a type error immediately in your IDE.
+- **Reliable**: There is no "stale" client code. If it compiles, the types match.
+- **Lightweight**: No extra files to manage in your repository.
+
+<Callout type="tip" title="Pro Tip">
+  By exporting only the `AppType` (e.g., `export type App = typeof app`), you can share your entire API contract with your frontend without exposing any of your server-side implementation logic.
+</Callout>

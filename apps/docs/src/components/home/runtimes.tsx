@@ -47,7 +47,7 @@ export function Runtimes() {
           <p className="text-white/30 text-sm leading-relaxed max-w-sm text-right">
             The Axeom core follows the{" "}
             <Link
-              href="https://wintercg.org"
+              href="https://winterTC.org"
               target="_blank"
               className="text-white underline decoration-white/20 underline-offset-4 hover:decoration-white transition-all"
             >

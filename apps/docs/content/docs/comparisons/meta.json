@@ -1,0 +1,10 @@
+{
+  "title": "Comparisons",
+  "pages": [
+    "index",
+    "trpc",
+    "hono",
+    "fastify",
+    "express"
+  ]
+}

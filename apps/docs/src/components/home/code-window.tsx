@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 const SERVER_CODE = `import Axeom, { s } from "axeom"
 import { swagger } from "@axeom/swagger"
@@ -152,7 +152,7 @@ export function CodeWindow() {
                     <span className="text-white/5 w-6 select-none leading-relaxed">
                       {(i + 1).toString().padStart(2, "0")}
                     </span>
-                    <pre className="text-white/30 whitespace-pre">
+                    <pre className="text-white/30 whitespace-pre lp-pre">
                       {line
                         .split(
                           /(\.use|\.derive|\.get|\.post|import|export|type|const|await|new Axeom|createClient|s\.object|s\.string|console\.log)/,

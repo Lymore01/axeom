@@ -1,0 +1,53 @@
+---
+title: Rate Limiting
+description: Protect your engine from traffic spikes and brute-force attacks.
+---
+
+The `@axeom/rate-limit` plugin allows you to limit the number of requests a client can make within a specific time window. It includes standard HTTP headers for client-side throttling awareness.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/rate-limit
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { rateLimit } from '@axeom/rate-limit';
+
+const app = new Axeom()
+  .use(rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    limit: 100,          // Max 100 requests per key
+    message: "Slow down, gravity is taking over."
+  }));
+```
+
+---
+
+## Headers Support
+
+The plugin automatically attaches standard rate-limit headers to every response:
+
+- `X-RateLimit-Limit`: The total allowed requests in the current window.
+- `X-RateLimit-Remaining`: How many requests are left.
+- `X-RateLimit-Reset`: The UTC time when the limit will reset.
+- `Retry-After`: (Sent on 429) The number of seconds to wait before retrying.
+
+---
+
+## Custom Identification
+
+By default, the plugin identifies clients using the `X-Forwarded-For` header. You can customize this to use User IDs, API Keys, or any other context data.
+
+```typescript
+app.use(rateLimit({
+  keyGenerator: (ctx) => ctx.user?.id || ctx.headers.get("x-api-key")
+}));
+```

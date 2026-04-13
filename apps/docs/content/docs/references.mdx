@@ -1,244 +1,110 @@
 ---
 title: References
-description: Keylio API reference documentation
+description: Axeom Engine API Reference.
 ---
 
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 
-## Core
+## Axeom Engine
 
-### Keylio
-
-The main class for initializing the authentication system.
+The primary class for building and managing your weightless API.
 
 ```typescript
-import { Keylio } from "keylio";
+import { Axeom } from "axeom";
 
-const keylio = new Keylio(config);
+const app = new Axeom();
 ```
 
-#### Parameters
+### Core Methods
+
+#### `.use(plugin)`
+Registers a plugin. A plugin is a function `(app: Axeom) => Axeom`.
+
+#### `.group(prefix, (app) => app)`
+Groups routes under a common path prefix. Creates an isolated branch for hooks and derivations.
+
+#### `.decorate(object)`
+Adds static properties to the context available to all handlers.
+
+#### `.derive(handler)`
+Adds dynamic properties to the context by running a function before the route handler.
+
+#### `.handle(request: Request)`
+The standard winterTC entry point. Converts a native `Request` into a `Promise<Response>`.
+
+---
+
+### Lifecycle Hooks
+
+#### `.onRequest(ctx => void)`
+Runs as soon as a request is matched, before any other logic.
+
+#### `.onBeforeHandle(ctx => void | Response)`
+Runs immediately before the route handler. Can return a `Response` to short-circuit.
+
+#### `.onResponse((res, ctx) => void | Response)`
+Runs after a response is generated. Can modify headers or return a new `Response`.
+
+---
+
+## Context (`ctx`)
+
+The context object passed to every handler and hook. Note that Axeom handles response conversion automatically—returning an object from a handler is equivalent to returning `Response.json()`.
 
 <TypeTable
   type={{
-    config: {
-      description: 'Configuration options for Keylio.',
-      type: 'KeylioAuthConfig',
+    request: {
+      description: 'The native standard Web Request object.',
+      type: 'Request',
+    },
+    headers: {
+      description: 'The request headers (shortcut to ctx.request.headers).',
+      type: 'Headers',
+    },
+    params: {
+      description: 'The typed path parameters extracted from the URL.',
+      type: 'Record<string, string>',
+    },
+    query: {
+      description: 'The typed search query parameters.',
+      type: 'Record<string, string>',
+    },
+    body: {
+      description: 'The parsed request body (JSON, FormData, or null).',
+      type: 'any',
+    },
+    setResponseHeader: {
+      description: 'Adds a header to the outgoing response.',
+      type: '(name: string, value: string) => void',
     }
   }}
 />
 
-## Client (React)
+---
 
-React hooks and providers for client-side session management.
+## Schema System
+
+Axeom uses a library-agnostic schema system. While it provides a native, zero-dependency utility (`s`), it supports any library that implements the `Validator` interface (including Zod).
 
 ```typescript
-import { KeylioSessionProvider, useSession } from "keylio/react";
+import { s } from "axeom";
+
+app.post("/data", (ctx) => {
+  return ctx.body;
+}, {
+  body: s.object({
+    id: s.number()
+  })
+});
 ```
 
-### KeylioSessionProvider
+### The `Validator` Interface
 
-Context provider that must wrap your application to enable session management.
-
-<TypeTable
-  type={{
-    children: {
-      description: 'The components of your application.',
-      type: 'React.ReactNode',
-    }
-  }}
-/>
-
-### useSession
-
-Hook to access the current session state and authentication methods.
-
-<TypeTable
-  type={{
-    data: {
-      description: 'The active session object containing user details and token.',
-      type: 'Session | null',
-    },
-    status: {
-      description: 'The current authentication state of the user.',
-      type: '"authenticated" | "unauthenticated" | "loading"',
-    },
-    refresh: {
-      description: 'Function to manually reload the session from the server.',
-      type: '() => Promise<void>',
-    },
-    signOut: {
-      description: 'Function to sign out the current user.',
-      type: '() => Promise<void>',
-    },
-    setSession: {
-      description: 'Manually update the client-side session state.',
-      type: '(session: SessionState) => void',
-    }
-  }}
-/>
-
-## Server (Next.js)
-
-Utilities for integrating Keylio with Next.js.
+To use an external library like Zod or TypeBox, they simply need to provide a `parse` method:
 
 ```typescript
-import { KeylioNextHandler } from "keylio/next";
+export interface Validator<T = any> {
+  readonly _output: T;
+  parse: (data: unknown) => T | Promise<T>;
+}
 ```
-
-### KeylioNextHandler
-
-Creates the API route handlers for Next.js App Router.
-
-```typescript
-export const { GET, POST } = KeylioNextHandler(keylio);
-```
-
-## Adapters
-
-Database adapters for persisting sessions.
-
-### Prisma Adapter
-
-```typescript
-import { prismaAdapter } from "keylio/adapters/prisma";
-```
-
-### MongoDB Adapter
-
-```typescript
-import { mongodbAdapter } from "keylio/adapters/mongodb";
-```
-
-## Types
-
-Common TypeScript definitions used throughout the library.
-
-```typescript
-import type { KeylioAuthConfig } from "keylio/types";
-```
-
-### KeylioAuthConfig
-
-The primary configuration object for initializing Keylio.
-
-<TypeTable
-  type={{
-    adapter: {
-      description: 'Database adapter instance (e.g., Prisma, MongoDB). Required.',
-      type: 'DBAdapter',
-      required: true,
-    },
-    session: {
-      description: 'Session configuration. The `secret` field is required.',
-      type: 'SessionOptions',
-      required: true,
-    },
-    auth: {
-      description: 'Configuration for authentication providers (Credentials, OAuth, Phone).',
-      type: 'AuthConfig',
-    },
-    callbacks: {
-      description: 'Event handlers for authentication lifecycle events.',
-      type: 'Callbacks',
-    },
-    features: {
-      description: 'Enable optional features like MFA or API keys.',
-      type: 'OptionalFeatures',
-    },
-    database: {
-      description: 'Direct database connection options (alternative to adapter).',
-      type: 'DbOptions',
-    },
-    roles: {
-      description: 'Role-based access control permissions.',
-      type: 'RolePermissions',
-    }
-  }}
-/>
-
-### SessionOptions
-
-<TypeTable
-  type={{
-    strategy: {
-      description: 'Mechanism to handle sessions. "jwt" uses stateless tokens, "database" persists sessions.',
-      type: '"jwt" | "database"',
-      default: "jwt"
-    },
-    secret: {
-      description: 'Secret key for signing tokens. Required.',
-      type: 'string',
-      required: true,
-    },
-    maxAge: {
-      description: 'Time in seconds until the session expires. Default is 1 day (86400).',
-      type: 'number',
-    },
-    cookie: {
-      description: 'Advanced cookie configuration (secure, sameSite, etc.).',
-      type: 'CookieOptions',
-    }
-  }}
-/>
-
-### AuthConfig
-
-<TypeTable
-  type={{
-    credentials: {
-      description: 'Email and password authentication settings.',
-      type: 'EmailPasswordOptions',
-    },
-    oauth: {
-      description: 'Array of OAuth provider configurations.',
-      type: 'OAuthProviderConfig[]',
-    },
-    phoneOtp: {
-      description: 'Phone number and OTP authentication settings.',
-      type: 'PhoneOtpOptions',
-    }
-  }}
-/>
-
-### Callbacks
-
-<TypeTable
-  type={{
-    onSignup: {
-      description: 'Async function triggered upon successful user registration.',
-      type: '(user: any) => Promise<void> | void',
-    },
-    onLogin: {
-      description: 'Async function triggered upon successful login.',
-      type: '(user: any) => Promise<void> | void',
-    },
-    jwt: {
-      description: 'Callback to modify the JWT token before it is signed.',
-      type: '(token: any, user?: any) => Promise<any> | any',
-    }
-  }}
-/>
-
-### OptionalFeatures
-
-<TypeTable
-  type={{
-    multiFactorAuth: {
-      description: 'Enable Multi-Factor Authentication support.',
-      type: 'boolean',
-    },
-    apiKeys: {
-      description: 'Enable API Key management for users.',
-      type: 'boolean',
-    },
-    loginAnalytics: {
-      description: 'Track login attempts and metadata.',
-      type: 'boolean',
-    },
-    customEmailTemplates: {
-      description: 'Allow usage of custom email templates for verification/reset.',
-      type: 'boolean',
-    }
-  }}
-/>

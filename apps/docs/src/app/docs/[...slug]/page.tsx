@@ -10,6 +10,8 @@ import { createRelativeLink } from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PageActions } from "@/components/page-actions";
+
 export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
 }) {
@@ -30,6 +32,7 @@ export default async function Page(props: {
             a: createRelativeLink(source, page),
           })}
         />
+        <PageActions path={params.slug.join('/') + '.mdx'} />
       </DocsBody>
     </DocsPage>
   );
