@@ -86,7 +86,7 @@ export function Features() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 border-t border-l border-r border-white/10">
           <FeatureCard
             id="01"
-            href="/docs/adapters"
+            href="/docs/runtimes/overview"
             category="Framework Agnostic"
             title="Native on your stack."
             description="First-class support and native adapters for Bun, Node.js (Express), Deno, and Cloudflare Workers."
@@ -101,7 +101,7 @@ export function Features() {
           />
           <FeatureCard
             id="02"
-            href="/docs/validation"
+            href="/docs/features/validation"
             category="Schema"
             title="Validation your way."
             description="Built-in weightless schema, or plug in Zod, Valibot, and TypeBox for enterprise-grade type safety."
@@ -121,7 +121,7 @@ export function Features() {
           />
           <FeatureCard
             id="03"
-            href="/docs/plugins/storage"
+            href="/docs/plugins/upload"
             category="Infrastructure"
             title="Storage Abstraction."
             description="Unified API for file uploads that bridges Local Storage, Amazon S3, and Cloudflare R2 seamlessly."
@@ -137,7 +137,7 @@ export function Features() {
           />
           <FeatureCard
             id="04"
-            href="/docs/real-time"
+            href="/docs/features/websockets"
             category="Real-Time"
             title="Event-Driven Core."
             description="Built-in abstractions for WebSockets and Server-Sent Events (SSE) for modern real-time applications."
@@ -157,7 +157,7 @@ export function Features() {
           />
           <FeatureCard
             id="06"
-            href="/docs/core-concepts"
+            href="/docs/architecture/core-concepts"
             category="Performance"
             title="Byte-Sized Core."
             description="Engineered for the edge. Total runtime footprint stays under 10kb including core plugins."

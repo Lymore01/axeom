@@ -1,6 +1,15 @@
 "use client";
 
-import { Box, FileCode, Globe, HardDrive, Lock, Plus, Zap, ShieldAlert } from "lucide-react";
+import {
+  Box,
+  FileCode,
+  Globe,
+  HardDrive,
+  Lock,
+  Plus,
+  Zap,
+  ShieldAlert,
+} from "lucide-react";
 import Link from "next/link";
 
 interface PluginProps {
@@ -46,14 +55,14 @@ export function Ecosystem() {
       name: "@axeom/swagger",
       description: "Auto-generated OpenAPI 3.0 & Scalar UI.",
       icon: <FileCode className="w-4 h-4" />,
-      size: "2.4kb",
+      size: "1.8kb",
       path: "/docs/plugins/swagger",
     },
     {
       name: "@axeom/auth",
       description: "Secure JWT identity powered by Jose.",
       icon: <Lock className="w-4 h-4" />,
-      size: "1.2kb",
+      size: "28.3kb",
       path: "/docs/plugins/auth",
     },
     {
@@ -67,21 +76,21 @@ export function Ecosystem() {
       name: "@axeom/ws",
       description: "Cross-runtime WebSocket abstractions.",
       icon: <Zap className="w-4 h-4" />,
-      size: "3.2kb",
-      path: "/docs/plugins/ws",
+      size: "0.2kb",
+      path: "/docs/plugins/websockets",
     },
     {
       name: "@axeom/upload",
       description: "Streaming file uploads for S3 & Local.",
       icon: <HardDrive className="w-4 h-4" />,
-      size: "4.1kb",
+      size: "0.8kb",
       path: "/docs/plugins/upload",
     },
     {
       name: "@axeom/static",
       description: "Optimized asset delivery for the edge.",
       icon: <Box className="w-4 h-4" />,
-      size: "1.5kb",
+      size: "1.1kb",
       path: "/docs/plugins/static",
     },
   ];
@@ -120,12 +129,14 @@ export function Ecosystem() {
             {plugins.map((plugin, i) => (
               <PluginCard key={i} {...plugin} />
             ))}
-            
+
             <div className="p-6 bg-black flex flex-col justify-center items-center opacity-20 border border-white/5">
               <div className="w-8 h-8 rounded-full border border-dashed border-white/20 flex items-center justify-center mb-4">
-                 <Plus className="w-3 h-3" />
+                <Plus className="w-3 h-3" />
               </div>
-              <span className="text-[8px] font-mono uppercase tracking-[0.2em]">Build One</span>
+              <span className="text-[8px] font-mono uppercase tracking-[0.2em]">
+                Build One
+              </span>
             </div>
           </div>
         </div>
