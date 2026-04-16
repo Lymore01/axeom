@@ -36,10 +36,11 @@ export const wsPlugin = () => {
         path,
         () => {
           return new Response(null, {
-            status: 101,
+            status: 200,
             headers: {
               Upgrade: "websocket",
               Connection: "Upgrade",
+              "X-Axeom-Status": "101",
             },
           });
         },
