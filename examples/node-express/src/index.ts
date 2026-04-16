@@ -30,10 +30,15 @@ const axeom = new Axeom()
   .decorate({
     db: { query: (sql: string) => `Result for ${sql}` },
   })
-  .use(authRoutes)
+  .derive((ctx) => {
+    return {
+      userId: ctx.headers.get("x-user-id") || "anonymous",
+    };
+  })
   .ws("/chat", {
     open(ws) {
       console.log("\x1b[36m[Node WS]\x1b[0m Client connected!");
+      console.log("\x1b[36m[Node WS]\x1b[0m Handshake Data:", JSON.stringify(ws.data));
       ws.send("Welcome to Axeom WebSocket (Node/Express)!");
     },
     message(ws, msg) {

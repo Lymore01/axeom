@@ -1,0 +1,65 @@
+---
+title: Runtime Support
+description: Axeom's approach to the multi-runtime landscape.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Axeom is designed to be **Universal**. By adhering to the **winterTC** standards, we ensure that your code runs identically across every modern JavaScript environment.
+
+---
+
+## Bun (Primary Environment)
+
+Axeom is optimized to run natively on Bun. It uses Bun's ultra-fast HTTP server and native WebSocket implementation.
+
+- **Fastest Startup**: No transpilation needed for TypeScript.
+- **Native IO**: Optimized for Bun's custom syscalls.
+- **Zero Config**: Just run `bun index.ts`.
+
+---
+
+## Next.js (Full Stack)
+
+Axeom integrates perfectly into Next.js App Router applications as API Route Handlers.
+
+```typescript
+// app/api/[[...axeom]]/route.ts
+import { createNextHandler } from 'axeom/web';
+import { app } from '@/server/app';
+
+export const { GET, POST, PUT, DELETE, PATCH, OPTIONS } = createNextHandler(app);
+```
+
+
+This allows you to share your API types with your Next.js frontend, giving you a **tRPC-like experience without the boilerplate**.
+
+---
+
+## Node.js & Express
+
+For teams with existing infrastructure or specific library requirements, Axeom offers a high-performance Express adapter.
+
+- **Compatibility**: Use any of the thousands of Express/Connect middle-wares.
+- **Gradual Migration**: Move your legacy Express routes to Axeom one by one.
+- **Ecosystem**: Access the full power of the Node.js package ecosystem.
+
+---
+
+## Deno & Edge
+
+Axeom is fully compatible with Deno and Edge providers like Cloudflare Workers.
+
+- **Zero Global Dependencies**: Axeom doesn't rely on Node built-ins.
+- **Standard Fetch**: Works natively with the Fetch API request/response cycle.
+- **Security**: Take advantage of Deno's granular permission system.
+
+---
+
+## Why Diversity Matters?
+
+The future of the web is distributed. You might start a project on a single dedicated server (Node) and later move to a globally distributed edge network (Deno/Cloudflare). With Axeom, this transition is as simple as switching an adapter. No code changes, no type regressions.
+
+<Callout type="info" title="The Universal Handler">
+  Regardless of the runtime, Axeom always exposes the exact same `handle(req: Request): Promise<Response>` interface.
+</Callout>

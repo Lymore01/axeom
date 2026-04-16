@@ -1,0 +1,39 @@
+---
+title: Compression
+description: Standard-compliant response compression for high-performance delivery.
+---
+
+The `@axeom/compression` plugin utilizes the native Web **CompressionStream API** to efficiently compress outgoing responses based on the client's `Accept-Encoding` header.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/compression
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { compression } from '@axeom/compression';
+
+const app = new Axeom()
+  .use(compression({
+    threshold: 1024 // Only compress responses larger than 1KB
+  }));
+```
+
+---
+
+## Features
+
+- **Standard Compliant**: Uses the standard `CompressionStream` API (supported in Bun, Deno, and Node 18+).
+- **Format Support**: Automatically negotiates **Gzip** and **Deflate** compression.
+- **Intelligent Skipping**: 
+    - Automatically ignores responses that already have a `Content-Encoding` header.
+    - Skips Server-Sent Events (`text/event-stream`) to preserve real-time delivery.
+- **Weightless**: Zero external dependencies, leveraging native runtime primitives.

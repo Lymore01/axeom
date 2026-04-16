@@ -1,0 +1,40 @@
+---
+title: CORS
+description: Cross-Origin Resource Sharing for secure communication.
+---
+
+The `@axeom/cors` plugin provides a simple way to manage Cross-Origin requests. It handles pre-flight `OPTIONS` requests and sets the appropriate headers based on your configuration.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/cors
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { cors } from '@axeom/cors';
+
+const app = new Axeom().use(cors({
+  origin: "https://axeom.dev",
+  methods: ["GET", "POST", "DELETE"],
+  credentials: true
+}));
+```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `origin` | `string \| string[] \| boolean` | `"*"` | Allowed origins. `true` mirrors the request origin. |
+| `methods` | `string[]` | `["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]` | Allowed HTTP methods. |
+| `allowedHeaders` | `string[]` | `[]` | Explicitly allowed request headers. |
+| `exposedHeaders` | `string[]` | `[]` | Headers exposed to the client. |
+| `credentials` | `boolean` | `false` | Whether to allow cookies/auth headers. |
+| `maxAge` | `number` | `undefined` | How long the pre-flight results can be cached. |

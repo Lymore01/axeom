@@ -1,0 +1,86 @@
+---
+title: Server-Sent Events (SSE)
+description: Real-time unidirectional streaming made simple.
+---
+
+Server-Sent Events (SSE) allow the server to push real-time updates to the web page over a single HTTP connection. Unlike WebSockets, SSE is unidirectional (Server -> Client) and works over standard HTTP without complex upgrades.
+
+Axeom provides a first-class `.sse()` method that abstracts the `ReadableStream` and `TextEncoder` logic for you.
+
+---
+
+## Basic Usage
+
+To create an SSE stream, use the `app.sse()` method. Your handler should be an **Async Generator** that yields the data you want to send.
+
+```typescript
+import { Axeom } from 'axeom';
+
+const app = new Axeom();
+
+app.sse("/notifications", async function* (ctx) {
+  while (true) {
+    // Wait for 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    // Yield data to the client
+    yield {
+      message: "New update received",
+      timestamp: Date.now()
+    };
+  }
+});
+```
+
+---
+
+## How it Works
+
+When you use `.sse()`, Axeom automatically:
+1.  Sets the `Content-Type` to `text/event-stream`.
+2.  Sets `Cache-Control: no-cache` and `Connection: keep-alive`.
+3.  Wraps your generator in a `ReadableStream`.
+4.  Prefixes every yielded chunk with `data: ` and suffixes it with `\n\n`.
+5.  Handles `JSON.stringify` for objects automatically.
+
+---
+
+## Closing the Connection
+
+When the client disconnects (e.g., closes the browser tab), the async generator will naturally stop execution. You can use a `try...finally` block to perform cleanup logic.
+
+```typescript
+app.sse("/live-stream", async function* (ctx) {
+  console.log("Client connected to stream");
+  
+  try {
+    for (let i = 0; i < 100; i++) {
+      yield { count: i };
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  } finally {
+    // This runs when the client disconnects or the stream ends
+    console.log("Cleaning up stream resources");
+  }
+});
+```
+
+---
+
+## Client-Side Consumption
+
+Consuming an Axeom SSE stream in the browser is standard:
+
+```javascript
+const eventSource = new EventSource("/notifications");
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log("Received:", data.message);
+};
+
+eventSource.onerror = () => {
+  console.error("Stream failed");
+  eventSource.close();
+};
+```

@@ -1,0 +1,105 @@
+---
+title: Lifecycle Hooks
+description: Mastering the request-response flow with Interceptors.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Axeom replaces traditional middleware with a dedicated **Hook System**. Hooks are specialized interceptors that allow you to attach logic to specific phases of the request execution lifecycle.
+
+---
+
+## The Request Lifecycle
+
+Understanding the sequence of hooks is key to building complex logic in a weightless framework.
+
+1.  **`onBeforeMatch`**: Global firewall. Runs before the router.
+2.  **`onRequest`**: Match confirmation. Runs once a route is identified.
+3.  **`onBeforeHandle`**: Handler guard. The last check before your logic runs.
+4.  **`Handler`**: Your core business logic.
+5.  **`onAfterHandle`**: Success inspector. Runs after the handler returns a value.
+6.  **`onResponse`**: Response courier. Modifies the final outgoing Response object.
+
+---
+
+## Global vs Local Hooks
+
+Hooks can be registered globally on the main app instance or locally within a group.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+// Global Hook: Runs for EVERY request
+app.onRequest((ctx) => {
+  console.log(`[GLOBAL]: ${ctx.request.url}`);
+});
+
+app.group("/api", (api) => {
+  // Local Hook: Runs only for routes inside /api
+  api.onBeforeHandle((ctx) => {
+    const auth = ctx.headers.get("Authorization");
+    if (!auth) return new Response("Forbidden", { status: 403 });
+  });
+
+  api.get("/data", () => "Sensitive data");
+});
+```
+
+---
+
+## Detailed Hook Breakdown
+
+### `onBeforeMatch`
+Use this for early-exit logic like maintenance modes or global redirects. It only has access to the raw `Request` object.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.onBeforeMatch((req) => {
+  if (req.headers.has("X-Maintenance")) {
+    return new Response("Service Unavailable", { status: 503 });
+  }
+});
+```
+
+### `onBeforeHandle` & `onAfterHandle`
+These are the most common hooks for authorization and logging. `onBeforeHandle` can stop the request by returning a `Response`.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.onBeforeHandle((ctx) => {
+  (ctx as any).timeStart = performance.now();
+});
+
+app.onAfterHandle((ctx) => {
+  const duration = performance.now() - (ctx as any).timeStart;
+  console.log(`Handler took ${duration}ms`);
+});
+```
+
+### `onResponse`
+This hook receives both the generated `Response` and the `Context`. Use it to inject custom headers or cookies globally.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.onResponse((res, ctx) => {
+  res.headers.set("X-Axeom-Version", "1.0.0");
+  return res; // You must return a Response!
+});
+```
+
+---
+
+## Performance Tip
+
+Axeom flattens hooks into an optimized array at startup. This means that having 10 hooks is significantly faster than 10 nested middleware functions in traditional frameworks, as there is no recursive "next()" call stack to manage.

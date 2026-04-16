@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "axeom": [
+        "../../packages/axeom/src/index.ts"
+      ],
+      "axeom/*": [
+        "../../packages/axeom/src/*"
+      ],
+      "@axeom/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@axeom/schema": [
+        "../../packages/schema/src/index.ts"
+      ],
+      "@axeom/logger": [
+        "../../packages/logger/src/index.ts"
+      ],
+      "fumadocs-mdx:collections/*": [
+        "./.source/*"
+      ]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "incremental": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "../../packages/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

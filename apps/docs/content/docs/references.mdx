@@ -1,0 +1,110 @@
+---
+title: References
+description: Axeom Engine API Reference.
+---
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+
+## Axeom Engine
+
+The primary class for building and managing your weightless API.
+
+```typescript
+import { Axeom } from "axeom";
+
+const app = new Axeom();
+```
+
+### Core Methods
+
+#### `.use(plugin)`
+Registers a plugin. A plugin is a function `(app: Axeom) => Axeom`.
+
+#### `.group(prefix, (app) => app)`
+Groups routes under a common path prefix. Creates an isolated branch for hooks and derivations.
+
+#### `.decorate(object)`
+Adds static properties to the context available to all handlers.
+
+#### `.derive(handler)`
+Adds dynamic properties to the context by running a function before the route handler.
+
+#### `.handle(request: Request)`
+The standard winterTC entry point. Converts a native `Request` into a `Promise<Response>`.
+
+---
+
+### Lifecycle Hooks
+
+#### `.onRequest(ctx => void)`
+Runs as soon as a request is matched, before any other logic.
+
+#### `.onBeforeHandle(ctx => void | Response)`
+Runs immediately before the route handler. Can return a `Response` to short-circuit.
+
+#### `.onResponse((res, ctx) => void | Response)`
+Runs after a response is generated. Can modify headers or return a new `Response`.
+
+---
+
+## Context (`ctx`)
+
+The context object passed to every handler and hook. Note that Axeom handles response conversion automatically—returning an object from a handler is equivalent to returning `Response.json()`.
+
+<TypeTable
+  type={{
+    request: {
+      description: 'The native standard Web Request object.',
+      type: 'Request',
+    },
+    headers: {
+      description: 'The request headers (shortcut to ctx.request.headers).',
+      type: 'Headers',
+    },
+    params: {
+      description: 'The typed path parameters extracted from the URL.',
+      type: 'Record<string, string>',
+    },
+    query: {
+      description: 'The typed search query parameters.',
+      type: 'Record<string, string>',
+    },
+    body: {
+      description: 'The parsed request body (JSON, FormData, or null).',
+      type: 'any',
+    },
+    setResponseHeader: {
+      description: 'Adds a header to the outgoing response.',
+      type: '(name: string, value: string) => void',
+    }
+  }}
+/>
+
+---
+
+## Schema System
+
+Axeom uses a library-agnostic schema system. While it provides a native, zero-dependency utility (`s`), it supports any library that implements the `Validator` interface (including Zod).
+
+```typescript
+import { s } from "axeom";
+
+app.post("/data", (ctx) => {
+  return ctx.body;
+}, {
+  body: s.object({
+    id: s.number()
+  })
+});
+```
+
+### The `Validator` Interface
+
+To use an external library like Zod or TypeBox, they simply need to provide a `parse` method:
+
+```typescript
+export interface Validator<T = any> {
+  readonly _output: T;
+  parse: (data: unknown) => T | Promise<T>;
+}
+```

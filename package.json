@@ -12,6 +12,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "turbo dev",
+    "axeom-docs": "turbo dev --filter axeom-docs",
     "dev:node": "turbo dev --filter node-express-example",
     "dev:bun": "turbo dev --filter bun-example",
     "dev:bun-native": "turbo dev --filter bun-native-app",

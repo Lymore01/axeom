@@ -1,0 +1,59 @@
+---
+title: WebSockets
+description: Real-time communication without the runtime headache.
+---
+
+Axeom provides a **Runtime-Agnostic WebSocket** implementation through the `@axeom/ws` plugin. This allows you to define your WebSocket logic once and have it work seamlessly across different environments like Bun or Node.js.
+
+---
+
+## Quick Start
+
+First, ensure you have the plugin installed and registered:
+
+```typescript
+import { Axeom } from 'axeom';
+import { wsPlugin } from '@axeom/ws';
+
+const app = new Axeom().use(wsPlugin());
+
+app.ws("/chat", {
+  open: (ws) => {
+    console.log("Connection established");
+  },
+  message: (ws, msg) => {
+    ws.send(`Echo: ${msg}`);
+  },
+  close: (ws, code, reason) => {
+    console.log("Connection closed");
+  }
+});
+```
+
+---
+
+## The Handshake Architecture
+
+As explained in the [Handshake Pattern](/docs/architecture/handshake-pattern), Axeom doesn't perform the physical WebSocket upgrade itself. Instead:
+
+1.  **Handshake**: When a client requests a WebSocket connection at `/chat`, Axeom matches the route and returns a `101 Switching Protocols` response.
+2.  **Metadata**: The route metadata holds your handlers (`open`, `message`, etc.).
+3.  **Upgrade**: The runtime adapter (e.g., Bun or Express) sees the `101` status and the metadata, then performs the native upgrade using the runtime's own engine.
+
+---
+
+## Runtime Performance
+
+### Bun
+In Bun, Axeom's WebSocket plugin is incredibly efficient because it leverages Bun's native C++ WebSocket implementation. Messages are passed directly from the socket to your handlers with minimal overhead.
+
+### Node.js (Express)
+When running on Express, the adapter uses the standard `ws` package under the hood to handle the upgrade, ensuring compatibility with the existing Node ecosystem.
+
+---
+
+## Best Practices
+
+- **Shared State**: Remember that WebSockets are stateful. Use the `ws.data` property (provided by some runtimes) or external stores like Redis for managing state across multiple connections.
+- **Security**: Always use the `@axeom/security` plugin to ensure proper headers and protections are in place for your handshake requests.
+- **E2E Types**: Currently, WebSocket message types are in development. Stay tuned for full type safety for message payloads!

@@ -1,0 +1,90 @@
+---
+title: Validation
+description: Ensuring data integrity with first-class schema support.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Validation isn't an afterthought in Axeom—it's part of the Blueprint. Axeom provides a native, zero-dependency validation engine through the `s` utility, while remaining completely flexible: you can use `s`, Zod, TypeBox, or any other library of your choice.
+
+---
+
+## The Native `s` Validator
+
+Axeom's built-in `s` utility is an ultra-lightweight validation engine designed specifically for the framework. It provides a familiar, chainable API with zero external dependencies, keeping your bundle size practically non-existent.
+
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+// ---cut---
+const CreateUserSchema = s.object({
+  username: s.string().min(3),
+  email: s.string().email(),
+  age: s.number().optional()
+});
+
+app.post("/users", (ctx) => {
+  // Direct access to validated body!
+  const { username, email } = ctx.body;
+  
+  return { id: 1, username };
+}, { 
+  body: CreateUserSchema 
+});
+```
+
+---
+
+## Bring Your Own Library
+
+Axeom is library-agnostic. Because the engine relies on a simple `Validator` interface, you can use any library that provides a `.parse()` or equivalent method.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+import { z } from 'zod';
+const app = new Axeom();
+// ---cut---
+app.post("/external", (ctx) => {
+  return ctx.body;
+}, {
+  body: z.object({
+    external_id: z.string()
+  })
+});
+```
+
+---
+
+## Validating Other Segments
+
+Axeom's validation covers every part of the request. Once validated, the data is automatically parsed and available on the context with full type safety.
+
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.get("/search", (ctx) => {
+  const { q, page } = ctx.query;
+  return { results: [], page };
+}, {
+  query: s.object({
+    q: s.string(),
+    page: s.number().default(1)
+  })
+});
+```
+
+---
+
+## Error Handling
+
+When validation fails, Axeom interrupts the request and returns a `400 Bad Request` with a clear description of the failure.
+
+<Callout type="info" title="Zero-Dependency Speed">
+  The native `s` validator is optimized for the Axeom engine, providing significantly faster cold-boots and lower memory usage than heavier alternatives, making it ideal for Edge and Serverless environments.
+</Callout>
+
+

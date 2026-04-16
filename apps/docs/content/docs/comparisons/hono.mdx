@@ -1,0 +1,244 @@
+---
+title: Axeom vs. Hono
+description: Comparing two pioneers of the universal web engine.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Hono and Axeom are both built for the **Fetch API** era. They are both runtime-agnostic and incredibly fast. However, Axeom distinguishes itself through its **Flattened Hook System** and **Zero-CodeGen Type Safety** which eliminates the need for complex internal middleware stacks.
+
+---
+
+## Routing & Handlers
+Both use Radix-Tree routers, but Axeom provides a more structured context object by default.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Unified Context
+app.get('/api', () => {
+  return "Axeom";
+});
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+const app = new Hono();
+
+// Context object 'c'
+app.get('/api', (c) => {
+  return c.text("Hono");
+});
+```
+</SideBySide>
+
+---
+
+## Validation & Type Safety
+Hono requires external libraries like Zod and specific validator middleware. Axeom includes the `s` schema engine natively.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Native Registry-based safety
+app.get('/user', ({ query }) => {
+  return query.id; 
+}, {
+  query: s.object({ id: s.string() })
+});
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+import { z } from 'zod';
+import { zValidator } from '@hono/zod-validator';
+const app = new Hono();
+
+// Requires @hono/zod-validator
+app.get('/user', 
+  zValidator('query', z.object({ id: z.string() })),
+  (c) => {
+    const { id } = c.req.valid('query');
+    return c.json({ id });
+  }
+);
+```
+</SideBySide>
+
+---
+
+## File Upload
+Axeom provides high-level abstractions for file saving that work across all WinterTC runtimes.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Built-in cross-runtime saving
+app.post('/upload', async (ctx) => {
+  const { file } = ctx.body;
+  await ctx.storage.save(file, `data/${file.name}`);
+  return "OK";
+}, { body: s.object({ file: s.file() }) });
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+const app = new Hono();
+
+// Manual buffer/stream handling
+app.post('/upload', async (c) => {
+  const body = await c.req.parseBody();
+  const file = body['file'] as File;
+  const buffer = await file.arrayBuffer();
+  // Manual FS calls required per runtime
+  return c.text("OK");
+});
+```
+</SideBySide>
+
+---
+
+## Lifecycle & Interceptors
+Hono uses the standard "Onion" middleware pattern. Axeom uses a **Flattened Hook Chain** (`onRequest`, `onResponse`) and `.derive()`.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Derive: Typesafe context injection
+app.derive(async () => ({ user: "axeom" }));
+
+app.get('/', ({ user }) => user);
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+const app = new Hono();
+
+// Set/Get: Untyped context
+app.use('*', async (c, next) => {
+  c.set('user', 'hono');
+  await next();
+});
+
+app.get('/', (c) => c.get('user'));
+```
+</SideBySide>
+
+---
+
+## Encapsulation (Grouping)
+Axeom groups are functional and preserve the isolated nature of interceptors.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Clean prefixing
+app.group('/admin', (admin) => {
+  admin.get('/dash', () => "OK");
+});
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+const app = new Hono();
+
+// Route instance nesting
+const admin = new Hono();
+admin.get('/dash', (c) => c.text("OK"));
+app.route('/admin', admin);
+```
+</SideBySide>
+
+---
+
+## Error Handling
+Axeom's engine catches all errors in the flattened chain, providing a single point of truth for failure.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Global rejection handling
+app.onRequest((ctx) => {
+  // Global interceptor logic
+});
+// Automated async error catching
+```
+
+```typescript twoslash
+// @noErrors
+import { Hono } from 'hono';
+const app = new Hono();
+
+// Custom error handler
+app.onError((err, c) => {
+  return c.json({ error: err.message });
+});
+```
+</SideBySide>
+
+---
+
+## OpenAPI & Documentation
+Axeom's core engine is aware of your `s` schemas, allowing for zero-config Swagger generation. Hono requires a complete re-write of your routing logic using the `OpenAPIHono` class.
+
+<SideBySide leftLabel="Axeom" rightLabel="Hono">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+import { swagger } from "@axeom/swagger";
+const app = new Axeom();
+
+// Fully automatic
+app.use(swagger());
+```
+
+```typescript twoslash
+// @noErrors
+import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
+const app = new OpenAPIHono();
+
+app.openapi(
+  createRoute({
+    method: 'get',
+    path: '/hello',
+    responses: { 200: { content: { 'application/json': { schema: { type: 'object' } } }, description: 'OK' } },
+  }),
+  (c) => c.json({ msg: 'hello' })
+);
+```
+</SideBySide>
+
+---
+
+## Summary: Why Axeom Wins
+
+| Feature | Hono | Axeom |
+| :--- | :--- | :--- |
+| **Type Safety** | Middleware + Zod | Native (Registry Pattern) |
+| **Performance** | Onion Middleware | Flattened Hook Chain |
+| **Complexity** | Middleware recursion | Linear Interceptors |
+| **Documentation** | Separate Library | Native Plugin |
+| **File Saving** | Manual per runtime | Native Universal Abstraction |

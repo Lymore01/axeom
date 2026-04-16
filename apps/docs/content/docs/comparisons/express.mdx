@@ -1,0 +1,236 @@
+---
+title: Axeom vs. Express
+description: Comparing the industry veteran with the weightless modern engine.
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Express is the most popular web framework in history. However, its architecture was designed in 2010 for a Callback-heavy, Node-only world. Axeom represents the evolution of that architecture—built for the modern, type-safe, and multi-runtime web.
+
+---
+
+## Routing & Handlers
+Express relies on the legacy Node.js `IncomingMessage` and `ServerResponse`. Axeom uses the modern, Fetch-compliant `Request` and `Response`.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Async-first, Fetch-compliant
+app.get('/api', async () => {
+  return "OK";
+});
+```
+
+```typescript twoslash
+// @noErrors
+import express from 'express';
+const app = express();
+
+// Callback-first, Node-only
+app.get('/api', (req, res) => {
+  res.send("OK");
+});
+```
+</SideBySide>
+
+---
+
+## Validation & Type Safety
+Express has no built-in validation. `req.body` is `any`. Axeom uses the native `s` schema engine to provide instant E2E safety.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Auto-typed via s.object()
+app.post('/user', ({ body }) => {
+  return body.name; // Typed
+}, {
+  body: s.object({ name: s.string() })
+});
+```
+
+```typescript twoslash
+// @noErrors
+import express from 'express';
+const app = express();
+
+// Manual casting or mid-ware
+app.post('/user', (req, res) => {
+  const name = req.body.name as string;
+  res.json({ name });
+});
+```
+</SideBySide>
+
+---
+
+## File Upload
+Express requires `multer` for multipart data. Axeom handles uploads natively with cross-runtime support via the upload plugin.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom, { s } from 'axeom';
+const app = new Axeom();
+
+// Integrated streaming
+app.post('/upload', async (ctx) => {
+  const { doc } = ctx.body;
+  await ctx.storage.save(doc, `storage/${doc.name}`);
+  return "Saved";
+}, { body: s.object({ doc: s.file() }) });
+```
+
+```typescript twoslash
+// @noErrors
+import multer from 'multer';
+import express from 'express';
+const app = express();
+
+// Requires Multer + FS logic
+const upload = multer({ dest: 'uploads/' });
+app.post('/upload', upload.single('doc'), (req, res) => {
+  res.send("Saved");
+});
+```
+</SideBySide>
+
+---
+
+## Lifecycle & Interceptors
+Express uses an imperative middleware chain. Axeom uses a declarative **Hook System** (`onRequest`, `onResponse`) and `.derive()`.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Declarative Hooks
+app.onRequest((ctx) => {
+  if (!ctx.request.headers.get('auth')) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+});
+```
+
+```typescript twoslash
+// @noErrors
+import express from 'express';
+const app = express();
+
+// Imperative Middleware
+app.use((req: any, res: any, next: any) => {
+  if (!req.headers.auth) return res.status(401).end();
+  next();
+});
+```
+</SideBySide>
+
+---
+
+## Encapsulation (Grouping)
+Express routers must be manually instantiated and wired. Axeom groups are part of the fluent API.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Fluent grouping
+app.group('/v1', (v1) => {
+  v1.get('/info', () => "v1");
+});
+```
+
+```typescript twoslash
+// @noErrors
+import express from 'express';
+const app = express();
+
+// Manual Router wiring
+const router = express.Router();
+router.get('/info', (req, res) => res.send("v1"));
+app.use('/v1', router);
+```
+</SideBySide>
+
+---
+
+## Error Handling
+Asynchronous errors in Express can crash the process. Axeom handles all rejections globally in its flattened lifecycle.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+
+// Global safety
+app.get('/err', async () => {
+  throw new Error("Rejected");
+});
+```
+
+```typescript twoslash
+// @noErrors
+import express from 'express';
+const app = express();
+
+// Requires wrappers for async
+app.get('/err', async (req, res, next) => {
+  try {
+    throw new Error("Rejected");
+  } catch (e) {
+    next(e);
+  }
+});
+```
+</SideBySide>
+
+---
+
+## OpenAPI & Documentation
+Documentation in Express is manual. In Axeom, it is a byproduct of your schemas via the `@axeom/swagger` plugin.
+
+<SideBySide leftLabel="Axeom" rightLabel="Express">
+```typescript twoslash
+// @noErrors
+// Automatic Swagger
+import Axeom from 'axeom';
+import { swagger } from "@axeom/swagger";
+const app = new Axeom();
+
+app.use(swagger());
+```
+
+```typescript twoslash
+// @noErrors
+// Manual JSDoc or JSON
+/**
+ * @swagger
+ */
+// const spec = swaggerJSDoc(options);
+// app.use('/docs', ui.serve, ui.setup(spec));
+```
+</SideBySide>
+
+---
+
+## Summary: Why Axeom Wins
+
+| Feature | Express | Axeom |
+| :--- | :--- | :--- |
+| **Async Support** | Manual Wrapper required | Native & 100% Core |
+| **Type Safety** | Third-party / Type casting | Native (Zero CodeGen) |
+| **Performance** | Synchronous-First | Async Radix Tree |
+| **Runtime** | Node.js Only | Universal (Edge/Bun/Deno/Node) |
+| **Dependencies** | Large transitive tree | Zero Dependencies |
+| **OpenAPI** | Manual JSDoc/JSON | Automatic Plugin |

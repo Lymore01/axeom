@@ -1,0 +1,98 @@
+---
+title: Blueprint Routing
+description: High-precision route definitions.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+In Axeom, routes are defined as **Blueprints**. They aren't just strings; they are the architectural schematic of your application. Axeom uses a high-performance Radix-Tree router that supports static matching, parameters, and wildcards with O(1) complexity.
+
+---
+
+## Basic Schematics
+
+Defining a route follows a standard functional pattern. You can return objects or strings directly, and Axeom will automatically handle the conversion to a standard Web Response.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.get("/ping", () => "pong");
+app.post("/data", () => ({ status: "accepted" }));
+app.put("/update", () => ({ status: "updated" }));
+app.delete("/purge", () => ({ status: "purged" }));
+```
+
+---
+
+## Path Parameters
+
+Capture dynamic segments using the `:` prefix. These are automatically extracted and typed in the `ctx.params` object.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.get("/engine/:node_id/status", (ctx) => {
+  const { node_id } = ctx.params;
+  return `Node ${node_id} is active at ${ctx.time}`;
+});
+```
+
+---
+
+## Grouping & Modularity
+
+Organize your schematics into logical modules using `.group()`. This allows you to apply prefixes or shared derivations to specific sections of your API.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.group("/v1", (v1) => {
+  v1.get("/status", () => "v1 kernel active");
+  
+  v1.get("/metrics", () => ({ cpu: "low" }));
+});
+```
+
+---
+## Signature Inference
+
+The most powerful aspect of Axeom's routing is that the **handler signature is the contract**. When you define a route, the input/output types are automatically captured and shared with the client.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.get("/users/:id", (ctx) => {
+  return { id: ctx.params.id, name: "Axeom User" };
+});
+
+// The client instantly knows the return type is { id: string, name: string }
+// AND that it requires an 'id' parameter.
+```
+
+
+---
+
+## Wildcards
+
+Use `*` to capture any remaining path segments. This is ideal for serving static assets or proxying requests.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+app.get("/logs/*", (ctx) => {
+  // Access the full request object for custom path handling
+  const url = new URL(ctx.request.url);
+  return `Retrieving log fragment from: ${url.pathname}`;
+});
+```
+

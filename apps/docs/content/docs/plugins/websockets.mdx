@@ -1,0 +1,89 @@
+---
+title: WebSockets
+description: Runtime-agnostic real-time communication.
+---
+
+The `@axeom/ws` plugin enables first-class WebSocket support that works identically across **Bun**, **Node.js (Express)**, and **Deno**. It abstracts away the complex handshake and upgrade logic of different runtimes.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/ws
+```
+
+---
+
+## Quick Start
+
+Register the plugin and use the `.ws()` method to define your socket handlers.
+
+```typescript
+import { Axeom } from 'axeom';
+import { ws } from '@axeom/ws';
+
+const app = new Axeom().use(ws());
+
+app.ws("/chat", {
+  open: (ws) => {
+    ws.send("Welcome to the engine.");
+  },
+  message: (ws, message) => {
+    console.log(`Received: ${message}`);
+    ws.send(`Echo: ${message}`);
+  },
+  close: (ws, code, reason) => {
+    console.log("Socket disconnected");
+  }
+});
+```
+
+---
+
+## The Handshake Pattern
+
+Axeom's WebSockets utilize the [Handshake Pattern](/docs/architecture/handshake-pattern). 
+
+1.  **Request**: The client performs a standard HTTP upgrade request.
+2.  **Handshake**: Axeom validates any headers or authentication logic defined in the route.
+3.  **Upgrade**: If acceptable, the plugin returns a `101 Switching Protocols` status. The runtime adapter handles the physical socket promotion.
+
+---
+
+## Event Handlers
+
+| Event | Arguments | Description |
+| :--- | :--- | :--- |
+| `open` | `(ws)` | Triggered when the connection is established. |
+| `message` | `(ws, msg)` | Triggered when a message is received. `msg` is usually a string or ArrayBuffer. |
+| `close` | `(ws, code, res)` | Triggered when the socket is closed. |
+| `drain` | `(ws)` | Triggered when the socket buffer is empty and ready for more data. |
+
+---
+
+## Context Integration
+
+Just like standard HTTP handlers, WebSocket routes can utilize **Derivations** and **Decorators**.
+
+```typescript
+app
+  .derive(async (ctx) => {
+    return { userId: ctx.headers.get("x-user-id") };
+  })
+  .ws("/private-chat", {
+    open: (ws) => {
+      // Access derived data from the handshake phase
+      console.log(`User ${ws.data.userId} connected`);
+    }
+  });
+```
+
+---
+
+## Target Reliability
+
+Because `@axeom/ws` uses native implementations:
+- **Bun**: Uses Bun's ultra-fast C++ WebSocket implementation.
+*   **Express**: Uses the reliable `ws` package via the Axeom Express adapter.
+*   **Deno**: Uses Deno's native `upgradeWebSocket` API.

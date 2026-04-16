@@ -1,0 +1,102 @@
+---
+title: Context & Derivation
+description: Powering your handlers with typed dependencies.
+---
+
+The `Context` (or `ctx`) is the soul of an Axeom handler. It contains everything you need to process a request and returned a response. But Axeom takes it one step further with **Context Derivation**.
+
+---
+
+## The `ctx` Object
+
+Every handler receives a `ctx` object which natively includes:
+- `ctx.request`: The standard Web `Request` object.
+- `ctx.headers`: Fast access to `ctx.request.headers`.
+- `ctx.params`: Typed path parameters (e.g., `:id`).
+- `ctx.query`: Typed search query parameters.
+- `ctx.body`: Automatically parsed JSON or FormData body.
+- `ctx.time`: The request's start timestamp.
+
+---
+
+## Decoration & Derivation
+
+Axeom allows you to inject dependencies or data into your context using `.decorate()` and `.derive()`.
+
+### `.decorate()`
+Use this for static dependencies like database clients that don't change per-request.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const PrismaClient = class { user = { findMany: () => [{ id: 1 }] } };
+// ---cut---
+const app = new Axeom()
+  .decorate({
+    db: new PrismaClient(),
+    config: { env: 'production' }
+  });
+
+app.get("/users", (ctx) => {
+  // ctx.db and ctx.config are available and fully typed!
+  return ctx.db.user.findMany();
+});
+```
+
+### `.derive()`
+Use this for per-request computations, like extracting authenticated users.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+// ---cut---
+const engine = app
+  .derive(async ({ headers }) => {
+    const userId = headers.get("x-user-id");
+    if (!userId) return { user: null };
+    
+    return { 
+      user: { id: userId, role: 'admin' } 
+    };
+  });
+
+engine.get("/me", (ctx) => {
+  return ctx.user; // ctx.user was derived per-request
+});
+```
+
+---
+
+## Performance: Mutation-Free Selection
+
+Axeom is designed for massive throughput. Instead of complex object spreading, it uses a high-performance context pool and deterministic property injection.
+
+1.  **Lower Memory Pressure**: Minimal object allocation during derivation.
+2.  **Higher Throughput**: Optimized for modern JIT engines by maintaining stable object shapes.
+3.  **Perfect Types**: Your IDE always knows exactly which properties are available based on your `.derive()` and `.decorate()` chain.
+
+---
+
+## Group Isolation
+
+When you use `.group()`, it creates a branch of the engine. Derivations added inside a group only affect routes within that group.
+
+```typescript twoslash
+// @noErrors
+import Axeom from 'axeom';
+const app = new Axeom();
+const checkAdminAuth = async () => ({ admin: true });
+// ---cut---
+app.group("/admin", (admin) => {
+  admin
+    .derive(checkAdminAuth)
+    .get("/dashboard", (ctx) => {
+       // ctx.admin is available here
+       return "Welcome";
+    });
+});
+
+app.get("/public", () => "Always available");
+```
+

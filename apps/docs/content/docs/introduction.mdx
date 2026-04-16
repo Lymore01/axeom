@@ -1,0 +1,70 @@
+---
+title: Introduction
+description: The Weightless Engine for Heavy-Duty APIs.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+import { Card, Cards } from 'fumadocs-ui/components/card'
+import { Box, Cpu, Globe, Lock, Shield, Zap } from 'lucide-react'
+
+**Axeom** is the first truly weightless web framework designed for the multi-runtime era. Built on the principle of **Zero-Code-Gen Type Safety**, Axeom provides a unified, ultra-fast experience that runs natively on **Bun**, **Deno**, **Next.js**, and **Node.js** without compromise.
+
+Traditional frameworks often come with heavy abstractions and "magic" code generation that slows down both development and runtime. Axeom takes a different path: **Static Transparency**. We move the heavy lifting to the initialization phase, leaving your request lifecycle as lean as a raw Fetch handler.
+
+<Callout type="info" title="The Ultra-Lean Philosophy">
+  Axeom isn't just a framework; it's a performance strategy. By using a Micro-Kernel architecture, you only pay for the features you actually use.
+</Callout>
+
+---
+
+## Why Choose Axeom?
+
+In a fragmented ecosystem of runtimes and edge providers, Axeom is your single source of truth.
+
+<Cards>
+  <Card title="Zero-Code-Gen" icon={<Shield />}>
+    End-to-end type safety directly from your server routes to your client, with *nothing* to generate.
+  </Card>
+
+  <Card title="Multi-Runtime" icon={<Globe />}>
+    Write once, deploy anywhere. Full support for Bun, Deno, Node.js, Next.js, and Cloudflare Workers.
+  </Card>
+
+  <Card title="High Velocity" icon={<Zap />}>
+    Binary-fast Radix routing and a mutable lifecycle that's optimized for modern JIT engines.
+  </Card>
+
+  <Card title="Runtime-Agnostic WebSockets" icon={<Cpu />}>
+    The first framework to offer uniform WebSocket logic that bridges the gap between different runtime engines.
+  </Card>
+
+  <Card title="Security First" icon={<Lock />}>
+    Hardened headers, rate limiting, and CORS support available as plug-and-play modules.
+  </Card>
+
+  <Card title="Modular by Design" icon={<Box />}>
+    A tiny core engine (~10KB) that expands only when you need it to. No hidden bloat.
+  </Card>
+</Cards>
+
+---
+
+## The "Blueprint" Approach
+
+Axeom treats your API as a **Blueprint**. You define the structure, the validation, and the logic. Axeom then compiles this blueprint into a high-performance execution tree. This approach ensures that your types are always in sync with your runtime behavior.
+
+- **Non-Invasive**: Use standard `Request` and `Response` objects.
+- **winterTC Compliant**: Future-proof your stack with web standards.
+- **Static Refinement**: Optimization happens at startup, not per-request.
+
+---
+
+## Get Started in 60 Seconds
+
+Ready to feel the lack of gravity? Start your journey with Axeom today.
+
+<Cards>
+  <Card title="Quick Start Installation" href="/docs/installation" />
+  <Card title="Architecture Deep Dive" href="/docs/architecture/core-concepts" />
+</Cards>
+

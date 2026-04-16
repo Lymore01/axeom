@@ -1,0 +1,56 @@
+---
+title: Core Concepts
+description: Understanding the weightless philosophy.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout'
+
+Axeom's architecture is built around three fundamental pillars: **The Micro-Kernel**, **Static Transformation**, and **The Blueprint**. Unlike traditional frameworks that add layers of abstraction at runtime, Axeom aims to strip them away.
+
+---
+
+## The Micro-Kernel
+
+The core of Axeom (the engine) is strictly limited to:
+- **Fast Routing**: A binary-fast Radix tree that matches incoming requests.
+- **Context Injection**: Providing a unified `ctx` object to your handlers.
+- **Lifecycle Management**: Executing hooks like `onRequest` and `onResponse`.
+
+Everything else—from CORS and Security to WebSockets and Swagger—is a plugin. This means your "Hello World" app doesn't carry the weight of a documentation generator or an authentication suite.
+
+---
+
+## Static Transformation
+
+Most frameworks interpret your routes at runtime. Axeom **transforms** them. When you define a route:
+
+```typescript
+app.get("/users/:id", (ctx) => { ... })
+```
+
+Axeom doesn't just store the string. It:
+1.  **Extracts path types**: Automatically identifies that `:id` is a parameter at the type level.
+2.  **Pre-compiles the handler chain**: If you have 5 middleware functions, they are flattened into an optimized execution array at startup.
+3.  **Refines the Registry**: Updates the internal TypeScript interface that powers the `AxeomClient`.
+
+---
+
+## The Blueprint Pattern
+
+In Axeom, your application is a **Blueprint**. You don't "run" code; you "instantiate" a blueprint. 
+
+Because the blueprint is a static object of types, it can be exported and consumed by other services. This is how Axeom achieves **Zero-Code-Gen Type Safety**. The client doesn't need a generated file because it can "peer" into the server's type registry in real-time.
+
+<Callout type="info" title="Why call it a Blueprint?">
+  Like an architectural drawing, an Axeom Blueprint is a complete schematic of your API. It defines not just the logic, but the shape, security, and validation requirements of every single endpoint.
+</Callout>
+
+---
+
+## The winterTC Advantage
+
+Axeom is built from the ground up to be **winterTC-compliant**. We use the standard `Request` and `Response` objects as they were meant to be used.
+
+- **Portability**: Move from Bun to Cloudflare Workers without changing a line of code.
+- **Performance**: Standard objects are highly optimized by modern JavaScript engines like V8 and JSC.
+- **Familiarity**: If you know the Fetch API, you already know Axeom.

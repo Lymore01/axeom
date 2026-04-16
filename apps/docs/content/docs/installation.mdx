@@ -1,0 +1,126 @@
+---
+title: Installation
+description: Get up and running with Axeom in seconds.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+Axeom is designed to be low-friction. You can install it using your favorite package manager.
+
+<Callout type="tip">
+  For the best experience, we recommend using **Bun** as it provides the fastest startup times and native support for the Axeom engine.
+</Callout>
+
+## Install the Meta-Package
+
+For the best experience, we recommend using the `axeom` meta-package, which includes the core engine, the standard schema validator (`s`), and the most common plugins.
+
+<Tabs items={['npm', 'pnpm', 'bun']}>
+  <Tab value="npm">
+    ```bash
+    npm install axeom
+    ```
+  </Tab>
+  <Tab value="pnpm">
+    ```bash
+    pnpm add axeom
+    ```
+  </Tab>
+  <Tab value="bun">
+    ```bash
+    bun add axeom
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Scaffolding a New Project
+
+The fastest way to start a new Axeom project is using our interactive CLI:
+
+```bash
+npx create-axeom@latest ./my-app
+```
+
+This will guide you through choosing a runtime (Bun, Node, Deno) and an architectural template (Monolith, Microservice, or Library).
+
+---
+
+## Manual Setup
+
+If you prefer to set things up manually, start by creating a main file (e.g., `index.ts`):
+
+```typescript
+import { Axeom } from 'axeom';
+
+const app = new Axeom();
+
+app.get("/", () => "Welcome to the Weightless World.");
+
+// Export the type for your frontend client
+export type AppType = typeof app;
+
+export default app;
+```
+
+---
+
+## Runtime Configuration
+
+Axeom's "Write Once" philosophy means you don't need different code for different runtimes. The engine automatically detects its environment.
+
+### For Bun & Deno (Native)
+Direct support is built-in. Just call `.listen()` and the engine will ignite the native server for you.
+
+```typescript
+import { Axeom } from 'axeom';
+
+const app = new Axeom();
+
+app.get("/", () => "Weightless & Native.");
+
+// Just listen. Axeom detects if it's Bun or Deno automatically.
+app.listen(3000);
+```
+
+### For Node.js (Express)
+Because Node.js lacks a native Fetch-based server, you use the Express adapter to bridge the gap.
+
+```bash
+npm install @axeom/express
+```
+
+```typescript
+import { createExpressAdapter } from '@axeom/express';
+import express from 'express';
+
+const server = express();
+server.use(createExpressAdapter(app)); // 'app' is your Axeom instance
+server.listen(3000);
+```
+
+### For Next.js
+Integrating with Next.js is just as simple, allowing you to share types between your backend and frontend.
+
+```typescript
+// app/api/[[...axeom]]/route.ts
+import { createNextHandler } from 'axeom/web';
+import app from '@/server';
+
+export const { GET, POST, PUT, DELETE, PATCH } = createNextHandler(app);
+```
+
+
+---
+
+## Technical Requirements
+
+To maintain peak performance, Axeom requires:
+- **TypeScript 5.0+**
+- **Node.js 18+** (if not using Bun or Deno)
+
+<Callout type="info">
+  Axeom uses static type analysis to provide E2E safety. Ensure your `tsconfig.json` has `strict` mode enabled for the best experience.
+</Callout>

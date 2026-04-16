@@ -1,0 +1,87 @@
+---
+title: OpenAPI & Swagger
+description: Interactive API documentation with zero manual maintenance.
+---
+
+@axeom/swagger is a core plugin that automatically generates **OpenAPI 3.1.0** specifications from your route definitions and schemas. It also provides a beautiful, interactive documentation UI powered by **Scalar**.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/swagger
+```
+
+---
+
+## Quick Start
+
+Simply register the plugin on your Axeom instance. It will automatically scan all registered routes across your entire application.
+
+```typescript
+import { Axeom } from 'axeom';
+import { swagger } from '@axeom/swagger';
+
+const app = new Axeom()
+  .use(swagger({
+    info: {
+      title: "Warehouse API",
+      version: "2.4.0",
+      description: "Managing industrial logic with gravity-free speed."
+    }
+  }));
+
+app.listen(3000);
+```
+
+By default, your documentation will be available at:
+- **UI**: `/docs`
+- **JSON Spec**: `/swagger.json`
+
+![The Axeom Scalar UI Interface](/scalar-ui.webp)
+*A high-fidelity technical readout provided by the Scalar integration.*
+
+---
+
+## Enriching your Documentation
+
+Axeom's router is metadata-aware. You can add descriptions, summaries, and tags directly to your route definitions.
+
+```typescript
+import { s } from 'axeom';
+
+app.post("/users", (ctx) => {
+  return { id: 1, ...ctx.body };
+}, {
+  body: s.object({
+    username: s.string(),
+    email: s.string().email()
+  }),
+  summary: "Create a new user",
+  description: "Registers a user in the global registry and triggers a welcome event.",
+  tags: ["User Management"]
+});
+```
+
+### Automatic Schema Conversion
+The Swagger plugin automatically converts your `s` schemas (Axeom Validators) into standard **JSON Schema** objects. This means your validation logic and your documentation are always perfectly in sync.
+
+---
+
+## Configuration Options
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `path` | `string` | `"/swagger.json"` | Where to serve the raw OpenAPI JSON. |
+| `uiPath` | `string` | `"/docs"` | Where to serve the interactive Scalar UI. |
+| `info` | `object` | `{}` | Standard OpenAPI info object (title, version, etc). |
+
+---
+
+## Scalar UI Advantages
+
+We chose **Scalar** as our default UI because it matches Axeom's performance philosophy:
+- **Fast**: Incredibly lightweight and optimized for large API specs.
+*   **Searchable**: Built-in global search for endpoints and models.
+*   **Integrated Client**: Test your API directly from the browser with a beautiful request builder.

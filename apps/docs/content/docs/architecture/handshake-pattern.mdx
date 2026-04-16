@@ -1,0 +1,68 @@
+---
+title: The Handshake Pattern
+description: Bridging the gap between runtimes.
+---
+
+One of the biggest challenges in building a "Universal" framework is handling environment-specific features like WebSockets or File-System access without bloating the core. Axeom solves this with the **Handshake Pattern**.
+
+---
+
+## The Problem: Fragmented Runtimes
+
+Each runtime (Bun, Node, Deno) has its own way of handling upgrades (like WebSockets) or streaming. If a framework tries to support them all natively in the core, it becomes a "dependency monster."
+
+---
+
+## The Solution: Handshake + Adapters
+
+Axeom splits every complex interaction into two phases:
+
+### 1. The Handshake (Agnostic)
+The core engine defines the *intent*. For example, when you use the `@axeom/ws` plugin to define a route, Axeom simply registers a route that returns a `101 Switching Protocols` status. It also attaches the WebSocket handlers (`open`, `message`, etc.) to the route's **Metadata Store**.
+
+```typescript
+app.ws("/chat", {
+  message: (ws, msg) => { ... }
+});
+```
+
+### 2. The Finalization (Runtime-Specific)
+This is where the **Adapter** comes in. Small, specialized packages like `@axeom/adapter-bun` or `@axeom/adapter-express` wrap the core handler.
+
+When the adapter sees a response with a `101` status, it:
+1.  **Retrieves the Metadata**: It pulls the WebSocket handlers from the matched route.
+2.  **Performs the Upgrade**: It calls the runtime's native upgrade method (e.g., `server.upgrade()` in Bun or `ws.handleUpgrade()` in Node).
+
+---
+
+## Benefits of the Handshake
+
+- **Zero Core Overhead**: The core engine doesn't even know what a WebSocket is—it just knows how to route and store metadata.
+- **Perfect Portability**: You can write your logic once using standard handlers, and the adapter takes care of the "dirty work" specific to your environment.
+- **Future Proof**: Support for new runtimes or protocols can be added by writing a new adapter, without ever touching the Axeom engine.
+
+---
+
+## Example: The Bun Adapter
+
+The Bun adapter is ultra-fast because it feeds the Axeom lifecycle directly into Bun's native C++ HTTP server.
+
+```typescript
+export function createBunAdapter(app: Axeom) {
+  return {
+    fetch: async (req, server) => {
+      const res = await app.handle(req);
+      
+      // The Handshake Check
+      if (res.status === 101 && res.metadata.ws) {
+        server.upgrade(req, { data: res.metadata.ws });
+        return undefined; // Bun takes over
+      }
+      
+      return res;
+    }
+  }
+}
+```
+
+This pattern ensures that Axeom remains the **lightest possible bridge** between your code and the high-performance hardware underneath.

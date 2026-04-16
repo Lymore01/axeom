@@ -29,7 +29,7 @@ export function createBunAdapter(Axeom: Axeom<any, any>, options: BunAdapterOpti
     fetch: async (request: Request, server: any) => {
       const response = await Axeom.handle(request);
 
-      if (response.status === 101) {
+      if (response.status === 101 || response.headers.get("X-Axeom-Status") === "101") {
         const url = new URL(request.url);
         const matched = Axeom.router.match(request.method, url.pathname);
 

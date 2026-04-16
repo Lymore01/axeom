@@ -1,0 +1,55 @@
+---
+title: Security Headers
+description: Hardening your engine with standard protection policies.
+---
+
+The `@axeom/security` plugin implements standard best practices for HTTP security headers (similar to Helmet in the Node ecosystem). It helps protect your API from common attacks like Clickjacking, XSS, and MIME-sniffing.
+
+---
+
+## Installation
+
+```bash
+npm install @axeom/security
+```
+
+---
+
+## Usage
+
+```typescript
+import { Axeom } from 'axeom';
+import { security } from '@axeom/security';
+
+const app = new Axeom().use(security());
+```
+
+---
+
+## Default Policies
+
+By default, the plugin enables the following protections:
+
+- **X-Content-Type-Options**: Set to `nosniff`.
+- **X-Frame-Options**: Set to `DENY` to prevent clickjacking.
+- **Referrer-Policy**: Set to `no-referrer`.
+- **X-XSS-Protection**: Set to `0` (modern browser standard).
+- **Strict-Transport-Security (HSTS)**: Configurable for HTTPS-only environments.
+
+---
+
+## Customizing Policies
+
+You can disable or customize individual headers to fit your specific deployment needs.
+
+```typescript
+app.use(security({
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true
+  },
+  xFrame: {
+    action: "SAMEORIGIN"
+  }
+}));
+```

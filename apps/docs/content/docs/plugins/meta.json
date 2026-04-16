@@ -1,0 +1,16 @@
+{
+  "title": "Plugins",
+  "pages": [
+    "index",
+    "swagger",
+    "auth",
+    "websockets",
+    "static",
+    "upload",
+    "rate-limit",
+    "cors",
+    "security",
+    "compression",
+    "logger"
+  ]
+}

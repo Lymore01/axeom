@@ -1,0 +1,48 @@
+{
+  "name": "axeom-docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
+    "postinstall": "fumadocs-mdx",
+    "lint": "biome check",
+    "format": "biome format --write"
+  },
+  "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-presence": "^1.1.5",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "class-variance-authority": "^0.7.1",
+    "fumadocs-core": "16.4.0",
+    "fumadocs-mdx": "14.2.2",
+    "fumadocs-twoslash": "^3.1.17",
+    "fumadocs-ui": "16.4.0",
+    "lucide-react": "^0.561.0",
+    "next": "16.0.10",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "scroll-into-view-if-needed": "^3.1.0",
+    "shiki": "^4.0.2",
+    "tailwind-merge": "^3.5.0",
+    "twoslash": "^0.3.7",
+    "axeom": "workspace:*",
+    "@axeom/core": "workspace:*",
+    "@axeom/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@fumadocs/tailwind": "^0.0.3",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^24.10.2",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
+  }
+}
